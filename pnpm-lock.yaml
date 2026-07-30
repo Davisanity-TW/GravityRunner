@@ -39,7 +39,11 @@ importers:
 
   packages/config: {}
 
-  packages/game-core: {}
+  packages/game-core:
+    dependencies:
+      '@gravity-runner/shared-contracts':
+        specifier: workspace:*
+        version: link:../shared-contracts
 
   packages/level-format: {}
 

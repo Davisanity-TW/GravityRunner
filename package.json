@@ -13,7 +13,7 @@
     "lint": "eslint . --max-warnings=0",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "typecheck": "pnpm -r --if-present typecheck",
+    "typecheck": "pnpm --filter @gravity-runner/shared-contracts build:types && pnpm -r --if-present typecheck",
     "test": "vitest run --passWithNoTests",
     "test:e2e": "playwright test",
     "build": "pnpm -r --if-present build",

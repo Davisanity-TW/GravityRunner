@@ -11,6 +11,9 @@
       "default": "./dist/index.js"
     }
   },
+  "dependencies": {
+    "@gravity-runner/shared-contracts": "workspace:*"
+  },
   "scripts": {
     "dev": "tsc --watch --pretty",
     "lint": "tsc --noEmit --pretty false",
