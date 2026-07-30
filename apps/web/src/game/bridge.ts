@@ -11,6 +11,12 @@ export type GameBridgeEventMap = {
     label: string;
     value: string;
   };
+  "player:state": {
+    gravity: "DOWN" | "UP";
+    commandCount: number;
+    x: number;
+    y: number;
+  };
 };
 
 type EventName = keyof GameBridgeEventMap;

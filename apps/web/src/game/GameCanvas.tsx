@@ -8,6 +8,7 @@ export function GameCanvas() {
   const bridge = useMemo(() => new GameEventBridge(), []);
   const [runtimeStatus, setRuntimeStatus] = useState("Starting runtime…");
   const [activeScene, setActiveScene] = useState("BOOT");
+  const [gravity, setGravity] = useState<"DOWN" | "UP">("DOWN");
 
   useEffect(() => {
     const container = containerRef.current;
@@ -21,9 +22,13 @@ export function GameCanvas() {
     const offReady = bridge.on("runtime:ready", ({ width, height }) => {
       setRuntimeStatus(`Runtime ready · ${width}×${height}`);
     });
+    const offPlayerState = bridge.on("player:state", (state) => {
+      setGravity(state.gravity);
+    });
     const runtime = phaserLifecycle.mount(container, bridge);
 
     return () => {
+      offPlayerState();
       offReady();
       offScene();
       runtime.dispose();
@@ -34,7 +39,9 @@ export function GameCanvas() {
     <div className="game-frame">
       <div className="game-frame__status" role="status">
         <span className="live-dot">{runtimeStatus}</span>
-        <span>SCENE / {activeScene}</span>
+        <span>
+          SCENE / {activeScene} · GRAVITY / {gravity}
+        </span>
       </div>
       <div
         ref={containerRef}

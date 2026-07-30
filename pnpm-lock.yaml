@@ -37,6 +37,12 @@ importers:
 
   apps/web:
     dependencies:
+      '@gravity-runner/game-core':
+        specifier: workspace:*
+        version: link:../../packages/game-core
+      '@gravity-runner/shared-contracts':
+        specifier: workspace:*
+        version: link:../../packages/shared-contracts
       phaser:
         specifier: ^4.2.1
         version: 4.2.1

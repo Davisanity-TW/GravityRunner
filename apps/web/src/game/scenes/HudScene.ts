@@ -3,6 +3,9 @@ import Phaser from "phaser";
 import type { GameEventBridge } from "../bridge.js";
 
 export class HudScene extends Phaser.Scene {
+  private gravityLabel: Phaser.GameObjects.Text | null = null;
+  private offPlayerState: (() => void) | null = null;
+
   constructor(private readonly bridge: GameEventBridge) {
     super({ key: "HudScene", active: false });
   }
@@ -27,6 +30,23 @@ export class HudScene extends Phaser.Scene {
       })
       .setOrigin(1, 0)
       .setScrollFactor(0);
+
+    this.gravityLabel = this.add
+      .text(this.scale.width / 2, 24, "GRAVITY / DOWN", {
+        color: "#e8f6ff",
+        fontFamily: "monospace",
+        fontSize: "14px",
+        fontStyle: "bold"
+      })
+      .setOrigin(0.5, 0)
+      .setScrollFactor(0);
+    this.offPlayerState = this.bridge.on("player:state", ({ gravity }) => {
+      this.gravityLabel?.setText(`GRAVITY / ${gravity}`);
+    });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.offPlayerState?.();
+      this.offPlayerState = null;
+    });
 
     this.bridge.emit("hud:status", {
       label: "Runtime",

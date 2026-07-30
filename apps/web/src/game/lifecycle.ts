@@ -35,6 +35,13 @@ function createGameConfig(
       pixelArt: false,
       roundPixels: false
     },
+    physics: {
+      default: "arcade",
+      arcade: {
+        gravity: { x: 0, y: 0 },
+        debug: false
+      }
+    },
     scale: {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,

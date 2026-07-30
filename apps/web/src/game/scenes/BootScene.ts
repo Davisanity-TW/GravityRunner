@@ -15,6 +15,8 @@ export class BootScene extends Phaser.Scene {
     runner.fillRoundedRect(4, 4, 40, 40, 10);
     runner.lineStyle(3, 0x071521, 1);
     runner.strokeRoundedRect(4, 4, 40, 40, 10);
+    runner.fillStyle(0x071521, 0.9);
+    runner.fillTriangle(16, 18, 32, 18, 24, 32);
     runner.generateTexture("runner-placeholder", 48, 48);
     runner.destroy();
 
