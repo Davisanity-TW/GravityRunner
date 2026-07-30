@@ -4,10 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsc --watch --pretty",
+    "dev": "vite",
     "lint": "tsc --noEmit --pretty false",
     "typecheck": "tsc --noEmit --pretty false",
-    "test": "node --test",
-    "build": "tsc --pretty false"
+    "test": "vitest run --passWithNoTests",
+    "build": "tsc --pretty false && vite build",
+    "preview": "vite preview"
   }
 }

@@ -2,6 +2,7 @@
   "name": "gravity-switch-runner",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "description": "An original gravity-switching side-scrolling runner.",
   "packageManager": "pnpm@11.9.0",
   "engines": {
@@ -9,12 +10,23 @@
   },
   "scripts": {
     "dev": "pnpm --parallel -r --if-present dev",
-    "lint": "pnpm -r --if-present lint",
+    "lint": "eslint . --max-warnings=0",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
     "typecheck": "pnpm -r --if-present typecheck",
-    "test": "pnpm -r --if-present test",
-    "build": "pnpm -r --if-present build"
+    "test": "vitest run --passWithNoTests",
+    "test:e2e": "playwright test",
+    "build": "pnpm -r --if-present build",
+    "verify": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build"
   },
   "devDependencies": {
-    "typescript": "^5.9.2"
+    "@eslint/js": "^9.32.0",
+    "@playwright/test": "^1.54.1",
+    "eslint": "^9.32.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.38.0",
+    "vite": "^7.0.6",
+    "vitest": "^3.2.4"
   }
 }
