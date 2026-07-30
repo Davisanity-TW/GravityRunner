@@ -45,7 +45,15 @@ importers:
         specifier: workspace:*
         version: link:../shared-contracts
 
-  packages/level-format: {}
+  packages/level-format:
+    dependencies:
+      '@gravity-runner/shared-contracts':
+        specifier: workspace:*
+        version: link:../shared-contracts
+    devDependencies:
+      '@gravity-runner/test-fixtures':
+        specifier: workspace:*
+        version: link:../test-fixtures
 
   packages/shared-contracts:
     dependencies:
@@ -53,7 +61,11 @@ importers:
         specifier: ^0.34.52
         version: 0.34.52
 
-  packages/test-fixtures: {}
+  packages/test-fixtures:
+    dependencies:
+      '@gravity-runner/shared-contracts':
+        specifier: workspace:*
+        version: link:../shared-contracts
 
 packages:
 

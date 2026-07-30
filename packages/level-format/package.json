@@ -11,6 +11,12 @@
       "default": "./dist/index.js"
     }
   },
+  "dependencies": {
+    "@gravity-runner/shared-contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@gravity-runner/test-fixtures": "workspace:*"
+  },
   "scripts": {
     "dev": "tsc --watch --pretty",
     "lint": "tsc --noEmit --pretty false",
