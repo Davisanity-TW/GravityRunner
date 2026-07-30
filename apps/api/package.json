@@ -1,0 +1,13 @@
+{
+  "name": "@gravity-runner/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsc --watch --pretty",
+    "lint": "tsc --noEmit --pretty false",
+    "typecheck": "tsc --noEmit --pretty false",
+    "test": "node --test",
+    "build": "tsc --pretty false"
+  }
+}
