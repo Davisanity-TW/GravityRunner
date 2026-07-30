@@ -17,5 +17,8 @@
     "typecheck": "tsc --noEmit --pretty false",
     "test": "node --test",
     "build": "tsc --pretty false"
+  },
+  "dependencies": {
+    "@sinclair/typebox": "^0.34.52"
   }
 }
