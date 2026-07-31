@@ -22,7 +22,7 @@ export function App() {
             <small>Signal Vault Prototype</small>
           </span>
         </a>
-        <span className="build-chip">PHASE 1 · WEB/PHASER SHELL</span>
+        <span className="build-chip">PHASE 1 · PLAYABLE VERTICAL SLICE</span>
       </header>
 
       {screen === "menu" ? (
@@ -35,8 +35,8 @@ export function App() {
             </h1>
             <p className="lede">
               Enter the Signal Vault, a synthetic archive built around one
-              decisive command: flip. This milestone verifies the React shell
-              and Phaser runtime boundary before gameplay physics arrive.
+              decisive command: flip. Cross alternating surfaces, synchronize
+              the relay checkpoint, survive the void, and extract the archive.
             </p>
             <div className="hero-actions">
               <button
@@ -47,7 +47,7 @@ export function App() {
                 <span>Initialize run</span>
                 <span aria-hidden="true">→</span>
               </button>
-              <span className="control-hint">SPACE / CLICK / TOUCH · SOON</span>
+              <span className="control-hint">SPACE / CLICK / TOUCH · FLIP</span>
             </div>
           </div>
 
@@ -86,7 +86,7 @@ export function App() {
           <div className="runtime-toolbar">
             <div>
               <p className="eyebrow">LIVE CANVAS / SIGNAL VAULT</p>
-              <h1>Runtime integration test</h1>
+              <h1>Signal Vault: Relay Run</h1>
             </div>
             <button
               className="text-button"

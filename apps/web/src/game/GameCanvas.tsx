@@ -9,6 +9,14 @@ export function GameCanvas() {
   const [runtimeStatus, setRuntimeStatus] = useState("Starting runtime…");
   const [activeScene, setActiveScene] = useState("BOOT");
   const [gravity, setGravity] = useState<"DOWN" | "UP">("DOWN");
+  const [runState, setRunState] = useState({
+    phase: "COUNTDOWN",
+    deaths: 0,
+    checkpointId: null as string | null,
+    canFlip: false,
+    x: 0,
+    cameraX: 0
+  });
 
   useEffect(() => {
     const container = containerRef.current;
@@ -25,9 +33,13 @@ export function GameCanvas() {
     const offPlayerState = bridge.on("player:state", (state) => {
       setGravity(state.gravity);
     });
+    const offTelemetry = bridge.on("run:telemetry", (state) => {
+      setRunState(state);
+    });
     const runtime = phaserLifecycle.mount(container, bridge);
 
     return () => {
+      offTelemetry();
       offPlayerState();
       offReady();
       offScene();
@@ -37,10 +49,21 @@ export function GameCanvas() {
 
   return (
     <div className="game-frame">
-      <div className="game-frame__status" role="status">
+      <div
+        className="game-frame__status"
+        role="status"
+        data-phase={runState.phase}
+        data-player-x={Math.round(runState.x)}
+        data-camera-x={Math.round(runState.cameraX)}
+        data-player-screen-x={Math.round(runState.x - runState.cameraX)}
+        data-can-flip={runState.canFlip}
+        data-deaths={runState.deaths}
+      >
         <span className="live-dot">{runtimeStatus}</span>
         <span>
-          SCENE / {activeScene} · GRAVITY / {gravity}
+          {runState.phase} · GRAVITY / {gravity} · FLIP /{" "}
+          {runState.canFlip ? "READY" : "LOCKED"} · DEATHS / {runState.deaths} ·
+          CP / {runState.checkpointId ?? "NONE"} · SCENE / {activeScene}
         </span>
       </div>
       <div

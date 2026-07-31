@@ -17,6 +17,23 @@ export type GameBridgeEventMap = {
     x: number;
     y: number;
   };
+  "run:telemetry": {
+    phase:
+      | "COUNTDOWN"
+      | "RUNNING"
+      | "PAUSED"
+      | "DEAD"
+      | "CHECKPOINT_RESPAWN"
+      | "LEVEL_COMPLETE"
+      | "RESULT";
+    deaths: number;
+    checkpointId: string | null;
+    tick: number;
+    fps: number;
+    canFlip: boolean;
+    x: number;
+    cameraX: number;
+  };
 };
 
 type EventName = keyof GameBridgeEventMap;

@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@gravity-runner/game-core": "workspace:*",
+    "@gravity-runner/level-format": "workspace:*",
     "@gravity-runner/shared-contracts": "workspace:*",
     "phaser": "^4.2.1",
     "react": "^19.2.8",

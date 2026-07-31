@@ -40,6 +40,9 @@ importers:
       '@gravity-runner/game-core':
         specifier: workspace:*
         version: link:../../packages/game-core
+      '@gravity-runner/level-format':
+        specifier: workspace:*
+        version: link:../../packages/level-format
       '@gravity-runner/shared-contracts':
         specifier: workspace:*
         version: link:../../packages/shared-contracts
