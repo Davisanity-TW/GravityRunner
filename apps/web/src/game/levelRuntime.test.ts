@@ -58,6 +58,7 @@ describe("data-driven level interactions", () => {
 
   it("kills hazards and respawns from the latest checkpoint", () => {
     const simulation = createRunningSimulation();
+    simulation.state.player.gravityDirection = -1;
     simulation.state.player.x = 2240;
     applyLevelInteractions(simulation, signalVaultLevel, 1000);
     expect(simulation.state.player.checkpointId).toBe("relay-01");
@@ -76,6 +77,7 @@ describe("data-driven level interactions", () => {
     expect(simulation.state.player).toMatchObject({
       x: 2240,
       y: 624,
+      gravityDirection: 1,
       checkpointId: "relay-01",
       alive: true
     });

@@ -2,7 +2,7 @@ import type { LevelManifest } from "@gravity-runner/shared-contracts";
 
 export const validLevelFixture = {
   id: "signal-vault",
-  version: 1,
+  version: 2,
   name: "Signal Vault",
   theme: "neon-archive",
   width: 2400,
@@ -11,11 +11,11 @@ export const validLevelFixture = {
   spawn: { x: 120, y: 600, gravityDirection: 1 },
   finish: { x: 2320, y: 80, width: 40, height: 560 },
   checkpoints: [
-    { id: "cp-1", x: 800, y: 600 },
-    { id: "cp-2", x: 1600, y: 80 }
+    { id: "cp-1", x: 800, y: 600, gravityDirection: 1 },
+    { id: "cp-2", x: 1600, y: 80, gravityDirection: -1 }
   ],
   platforms: [
-    { id: "floor-1", x: 0, y: 650, width: 900, height: 70 },
+    { id: "floor-1", x: 0, y: 650, width: 1100, height: 70 },
     { id: "ceiling-1", x: 900, y: 0, width: 900, height: 70 },
     { id: "floor-2", x: 1800, y: 650, width: 600, height: 70 }
   ],
@@ -61,8 +61,8 @@ export const invalidSpawnLevelFixture = {
 export const unorderedCheckpointsLevelFixture = {
   ...validLevelFixture,
   checkpoints: [
-    { id: "cp-2", x: 1600, y: 80 },
-    { id: "cp-1", x: 800, y: 600 }
+    { id: "cp-2", x: 1600, y: 80, gravityDirection: -1 },
+    { id: "cp-1", x: 800, y: 600, gravityDirection: 1 }
   ]
 } as const satisfies LevelManifest;
 

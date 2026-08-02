@@ -23,7 +23,7 @@ const playerState = {
 
 const levelManifest = {
   id: "signal-vault",
-  version: 1,
+  version: 2,
   name: "Signal Vault",
   theme: "neon-archive",
   width: 2400,
@@ -31,7 +31,7 @@ const levelManifest = {
   runSpeed: 240,
   spawn: { x: 120, y: 600, gravityDirection: 1 },
   finish: { x: 2290, y: 80, width: 40, height: 560 },
-  checkpoints: [{ id: "cp-1", x: 1120, y: 600 }],
+  checkpoints: [{ id: "cp-1", x: 1120, y: 600, gravityDirection: 1 }],
   platforms: [
     { id: "floor-1", x: 0, y: 650, width: 900, height: 70 },
     { id: "ceiling-1", x: 900, y: 0, width: 900, height: 70 }

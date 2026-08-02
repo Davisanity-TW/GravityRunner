@@ -72,6 +72,7 @@ describe("fixed-step state machine", () => {
         id: "cp-1",
         x: 360,
         y: 90,
+        gravityDirection: -1,
         atMs: 1000
       });
       completeLevel(simulation, 1250);
@@ -132,6 +133,7 @@ describe("commands and lifecycle events", () => {
       id: "cp-1",
       x: 640,
       y: 80,
+      gravityDirection: -1,
       atMs: 300
     });
     killPlayer(simulation, "hazard", 400);
@@ -144,12 +146,36 @@ describe("commands and lifecycle events", () => {
     expect(simulation.state.player).toMatchObject({
       x: 640,
       y: 80,
+      gravityDirection: -1,
       checkpointId: "cp-1",
       alive: true
     });
 
     stepSimulation(simulation, simulation.fixedDeltaMs);
     expect(simulation.state.phase).toBe("COUNTDOWN");
+  });
+
+  it("respawns toward the checkpoint surface instead of the arrival gravity", () => {
+    const simulation = createRunningSimulation();
+    expect(simulation.state.player.gravityDirection).toBe(1);
+
+    reachCheckpoint(simulation, {
+      id: "ceiling-cp",
+      x: 640,
+      y: 80,
+      gravityDirection: -1,
+      atMs: 300
+    });
+    killPlayer(simulation, "void", 400);
+    stepSimulation(simulation, simulation.fixedDeltaMs * 18);
+
+    expect(simulation.state.player).toMatchObject({
+      x: 640,
+      y: 80,
+      gravityDirection: -1,
+      checkpointId: "ceiling-cp",
+      alive: true
+    });
   });
 
   it("emits level completion at most once", () => {

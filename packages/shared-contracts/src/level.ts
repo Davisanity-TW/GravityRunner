@@ -19,7 +19,8 @@ const CheckpointSchema = Type.Object(
   {
     id: IdentifierSchema,
     x: Type.Number(),
-    y: Type.Number()
+    y: Type.Number(),
+    gravityDirection: GravityDirectionSchema
   },
   { additionalProperties: false }
 );

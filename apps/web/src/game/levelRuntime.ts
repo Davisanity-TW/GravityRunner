@@ -123,6 +123,7 @@ export function applyLevelInteractions(
         id: checkpoint.id,
         x: checkpoint.x,
         y: checkpoint.y,
+        gravityDirection: checkpoint.gravityDirection,
         atMs
       });
       if (simulation.state.player.checkpointId === checkpoint.id) {

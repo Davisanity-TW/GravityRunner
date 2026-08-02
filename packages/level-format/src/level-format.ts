@@ -18,6 +18,8 @@ export type LevelValidationErrorCode =
   | "FINISH_OUT_OF_BOUNDS"
   | "CHECKPOINT_OUT_OF_BOUNDS"
   | "CHECKPOINTS_UNORDERED"
+  | "CHECKPOINT_UNSUPPORTED_SURFACE"
+  | "CHECKPOINT_FORWARD_PATH_UNSAFE"
   | "GEOMETRY_OUT_OF_BOUNDS"
   | "UNSUPPORTED_HAZARD_TYPE";
 
@@ -37,6 +39,9 @@ type Rectangle = {
   width: number;
   height: number;
 };
+
+const CHECKPOINT_SUPPORT_TOLERANCE = 64;
+const CHECKPOINT_SAFE_RUNWAY_SECONDS = 0.75;
 
 function pointInWorld(
   point: { x: number; y: number },
@@ -72,6 +77,38 @@ function pointIntersectsRectangle(
     point.y > rectangle.y &&
     point.y < rectangle.y + rectangle.height
   );
+}
+
+function supportsCheckpoint(
+  platform: Rectangle,
+  checkpoint: LevelManifest["checkpoints"][number]
+): boolean {
+  if (checkpoint.x < platform.x || checkpoint.x > platform.x + platform.width) {
+    return false;
+  }
+
+  if (checkpoint.gravityDirection === 1) {
+    const distance = platform.y - checkpoint.y;
+    return distance >= 0 && distance <= CHECKPOINT_SUPPORT_TOLERANCE;
+  }
+
+  const distance = checkpoint.y - (platform.y + platform.height);
+  return distance >= 0 && distance <= CHECKPOINT_SUPPORT_TOLERANCE;
+}
+
+function hazardThreatensCheckpoint(
+  hazard: Rectangle,
+  checkpoint: LevelManifest["checkpoints"][number],
+  safeEndX: number
+): boolean {
+  const overlapsRunway =
+    hazard.x < safeEndX && hazard.x + hazard.width > checkpoint.x;
+  const onRespawnSide =
+    checkpoint.gravityDirection === 1
+      ? hazard.y + hazard.height >= checkpoint.y
+      : hazard.y <= checkpoint.y;
+
+  return overlapsRunway && onRespawnSide;
 }
 
 function validateUniqueIds(
@@ -154,6 +191,37 @@ export function validateLevelManifest(
         code: "CHECKPOINTS_UNORDERED",
         path: `/checkpoints/${index}/x`,
         message: "Checkpoint x positions must be strictly increasing"
+      });
+    }
+
+    const support = level.platforms.find((platform) =>
+      supportsCheckpoint(platform, checkpoint)
+    );
+    if (support === undefined) {
+      errors.push({
+        code: "CHECKPOINT_UNSUPPORTED_SURFACE",
+        path: `/checkpoints/${index}`,
+        message:
+          "Checkpoint must identify the gravity direction of a nearby supporting surface"
+      });
+      return;
+    }
+
+    const safeEndX =
+      checkpoint.x + level.runSpeed * CHECKPOINT_SAFE_RUNWAY_SECONDS;
+    const supportEndsTooSoon = support.x + support.width < safeEndX;
+    const blockingHazard = level.hazards.find((hazard) =>
+      hazardThreatensCheckpoint(hazard, checkpoint, safeEndX)
+    );
+
+    if (supportEndsTooSoon || blockingHazard !== undefined) {
+      errors.push({
+        code: "CHECKPOINT_FORWARD_PATH_UNSAFE",
+        path: `/checkpoints/${index}`,
+        message:
+          blockingHazard === undefined
+            ? "Checkpoint supporting surface must continue through the safe respawn runway"
+            : `Checkpoint safe respawn runway intersects hazard "${blockingHazard.id}"`
       });
     }
   });

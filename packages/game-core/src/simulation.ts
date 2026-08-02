@@ -307,7 +307,13 @@ export function stepSimulation(
 
 export function reachCheckpoint(
   simulation: GameSimulation,
-  checkpoint: { id: string; x: number; y: number; atMs: number }
+  checkpoint: {
+    id: string;
+    x: number;
+    y: number;
+    gravityDirection: GravityDirection;
+    atMs: number;
+  }
 ): void {
   if (
     simulation.state.phase !== "RUNNING" ||
@@ -320,7 +326,7 @@ export function reachCheckpoint(
   simulation.respawnPoint = {
     x: checkpoint.x,
     y: checkpoint.y,
-    gravityDirection: simulation.state.player.gravityDirection
+    gravityDirection: checkpoint.gravityDirection
   };
   simulation.state.player.checkpointId = checkpoint.id;
   simulation.events.push({

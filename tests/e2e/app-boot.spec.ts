@@ -92,6 +92,48 @@ test("dies and respawns without a backend", async ({ page }, testInfo) => {
   expect(Number(await status.getAttribute("data-player-x"))).toBeLessThan(900);
 });
 
+test("respawns toward the checkpoint surface after a ceiling-side death", async ({
+  page
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium");
+  const { canvas, status } = await startRun(page);
+
+  await waitForPlayerX(status, 850);
+  await canvas.click({ position: { x: 640, y: 360 } });
+  await expect(status).toHaveAttribute("data-can-flip", "true", {
+    timeout: 3_000
+  });
+
+  await waitForPlayerX(status, 1500);
+  await canvas.click({ position: { x: 640, y: 360 } });
+  await expect(status).toHaveAttribute("data-can-flip", "true", {
+    timeout: 3_000
+  });
+
+  await waitForPlayerX(status, 2250);
+  await expect(status).toContainText("CP / relay-01");
+
+  await waitForPlayerX(status, 2450);
+  await canvas.click({ position: { x: 640, y: 360 } });
+  await expect(status).toContainText("GRAVITY / UP");
+
+  await expect(status).toHaveAttribute("data-phase", "DEAD", {
+    timeout: 7_000
+  });
+  await expect(status).toHaveAttribute("data-phase", "RUNNING", {
+    timeout: 3_000
+  });
+  await expect(status).toContainText("GRAVITY / DOWN");
+  await expect(status).toContainText("CP / relay-01");
+  await expect(status).toHaveAttribute("data-can-flip", "true", {
+    timeout: 2_000
+  });
+
+  const respawnX = Number(await status.getAttribute("data-player-x"));
+  expect(respawnX).toBeGreaterThanOrEqual(2240);
+  expect(respawnX).toBeLessThan(2820);
+});
+
 test("completes the original relay-run level with camera follow", async ({
   page
 }, testInfo) => {

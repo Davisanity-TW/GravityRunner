@@ -2,7 +2,7 @@ import type { LevelManifest } from "@gravity-runner/shared-contracts";
 
 export const signalVaultLevel = {
   id: "signal-vault",
-  version: 1,
+  version: 2,
   name: "Signal Vault: Relay Run",
   theme: "neon-archive",
   width: 3900,
@@ -10,7 +10,7 @@ export const signalVaultLevel = {
   runSpeed: 240,
   spawn: { x: 640, y: 624, gravityDirection: 1 },
   finish: { x: 3740, y: 72, width: 64, height: 576 },
-  checkpoints: [{ id: "relay-01", x: 2240, y: 624 }],
+  checkpoints: [{ id: "relay-01", x: 2240, y: 624, gravityDirection: 1 }],
   platforms: [
     { id: "floor-opening", x: 0, y: 648, width: 1420, height: 72 },
     { id: "ceiling-switchback", x: 780, y: 0, width: 1380, height: 72 },

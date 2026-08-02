@@ -17,6 +17,7 @@
   "scripts": {
     "dev": "tsc --watch --pretty",
     "lint": "tsc --noEmit --pretty false",
+    "build:types": "tsc --emitDeclarationOnly --pretty false",
     "typecheck": "tsc --noEmit --pretty false",
     "test": "node --test",
     "build": "tsc --pretty false"

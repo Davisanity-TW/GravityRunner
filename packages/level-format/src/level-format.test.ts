@@ -42,6 +42,44 @@ describe("level manifest parser", () => {
   ] as const)("rejects invalid fixture with %s", (fixture, expectedCode) => {
     expect(errorCodes(fixture)).toContain(expectedCode);
   });
+
+  it("rejects checkpoints whose gravity does not point at their surface", () => {
+    const unsupportedCheckpoint = {
+      ...validLevelFixture,
+      checkpoints: [
+        {
+          ...validLevelFixture.checkpoints[0],
+          gravityDirection: -1
+        },
+        validLevelFixture.checkpoints[1]
+      ]
+    };
+
+    expect(errorCodes(unsupportedCheckpoint)).toContain(
+      "CHECKPOINT_UNSUPPORTED_SURFACE"
+    );
+  });
+
+  it("rejects hazards inside the forward respawn runway", () => {
+    const unsafeCheckpoint = {
+      ...validLevelFixture,
+      hazards: [
+        ...validLevelFixture.hazards,
+        {
+          id: "checkpoint-spikes",
+          type: "spikes",
+          x: 860,
+          y: 610,
+          width: 40,
+          height: 40
+        }
+      ]
+    };
+
+    expect(errorCodes(unsafeCheckpoint)).toContain(
+      "CHECKPOINT_FORWARD_PATH_UNSAFE"
+    );
+  });
 });
 
 describe("stable checksum input", () => {
