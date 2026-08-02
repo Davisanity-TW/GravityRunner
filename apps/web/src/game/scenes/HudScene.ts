@@ -8,6 +8,7 @@ export class HudScene extends Phaser.Scene {
   private debugLabel: Phaser.GameObjects.Text | null = null;
   private offPlayerState: (() => void) | null = null;
   private offTelemetry: (() => void) | null = null;
+  private offSettings: (() => void) | null = null;
 
   constructor(private readonly bridge: GameEventBridge) {
     super({ key: "HudScene", active: false });
@@ -59,7 +60,14 @@ export class HudScene extends Phaser.Scene {
         }
       )
       .setOrigin(1, 1)
-      .setScrollFactor(0);
+      .setScrollFactor(0)
+      .setVisible(false);
+    this.offSettings = this.bridge.on(
+      "settings:changed",
+      ({ debugOverlay }) => {
+        this.debugLabel?.setVisible(debugOverlay);
+      }
+    );
     this.offTelemetry = this.bridge.on("run:telemetry", (state) => {
       this.gravityLabel?.setText(
         `GRAVITY / ${this.currentGravity} · FLIP / ${
@@ -77,6 +85,8 @@ export class HudScene extends Phaser.Scene {
       this.offPlayerState = null;
       this.offTelemetry?.();
       this.offTelemetry = null;
+      this.offSettings?.();
+      this.offSettings = null;
     });
 
     this.bridge.emit("hud:status", {

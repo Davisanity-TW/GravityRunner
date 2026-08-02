@@ -1,4 +1,14 @@
 export type GameBridgeEventMap = {
+  "ui:pause": Record<string, never>;
+  "ui:resume": Record<string, never>;
+  "ui:restart": Record<string, never>;
+  "settings:changed": {
+    flipKey: string;
+    reducedEffects: boolean;
+    debugOverlay: boolean;
+    musicVolume: number;
+    effectsVolume: number;
+  };
   "scene:changed": {
     scene: "BOOT" | "PRELOAD" | "GAME" | "HUD";
   };
@@ -28,6 +38,7 @@ export type GameBridgeEventMap = {
       | "RESULT";
     deaths: number;
     checkpointId: string | null;
+    elapsedMs: number;
     tick: number;
     fps: number;
     canFlip: boolean;

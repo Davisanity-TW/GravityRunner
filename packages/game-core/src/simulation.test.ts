@@ -7,7 +7,9 @@ import {
   enterMenu,
   getSimulationResult,
   killPlayer,
+  pauseRun,
   reachCheckpoint,
+  resumeRun,
   stepSimulation,
   type GameSimulation
 } from "./index.js";
@@ -188,5 +190,26 @@ describe("commands and lifecycle events", () => {
     expect(
       simulation.events.filter((event) => event.type === "LEVEL_COMPLETED")
     ).toHaveLength(1);
+  });
+
+  it("pauses without advancing the run and resumes deterministically", () => {
+    const simulation = createRunningSimulation();
+    const beforePause = {
+      x: simulation.state.player.x,
+      elapsedMs: simulation.state.elapsedMs,
+      runTicks: simulation.runTicks
+    };
+
+    pauseRun(simulation);
+    stepSimulation(simulation, 500);
+    expect(simulation.state.phase).toBe("PAUSED");
+    expect(simulation.state.player.x).toBe(beforePause.x);
+    expect(simulation.state.elapsedMs).toBe(beforePause.elapsedMs);
+    expect(simulation.runTicks).toBe(beforePause.runTicks);
+
+    resumeRun(simulation);
+    stepSimulation(simulation, simulation.fixedDeltaMs);
+    expect(simulation.state.phase).toBe("RUNNING");
+    expect(simulation.runTicks).toBe(beforePause.runTicks + 1);
   });
 });

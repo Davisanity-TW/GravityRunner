@@ -15,7 +15,8 @@
     "format:check": "prettier . --check",
     "typecheck": "pnpm --filter @gravity-runner/shared-contracts build:types && pnpm --filter @gravity-runner/game-core build:types && pnpm --filter @gravity-runner/test-fixtures build:types && pnpm --filter @gravity-runner/level-format build:types && pnpm -r --if-present typecheck",
     "test": "vitest run --passWithNoTests",
-    "test:e2e": "playwright test",
+    "build:e2e-runtime": "pnpm --filter @gravity-runner/shared-contracts build && pnpm --filter @gravity-runner/game-core build",
+    "test:e2e": "pnpm build:e2e-runtime && playwright test",
     "build": "pnpm -r --if-present build",
     "verify": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build"
   },

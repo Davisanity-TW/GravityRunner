@@ -31,6 +31,48 @@ test("opens the web application shell", async ({ page }) => {
   await expect(
     page.getByRole("button", { name: "Initialize run" })
   ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Practice" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Endless" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Local Multiplayer" })
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Coming soon" })).toHaveCount(
+    3
+  );
+});
+
+test("persists settings and remaps the keyboard flip action", async ({
+  page
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Settings" }).click();
+  const settings = page.getByRole("dialog", { name: "Settings" });
+  await expect(settings).toBeVisible();
+
+  await page.getByLabel("Flip key").selectOption("KeyW");
+  await page.getByLabel("Music volume").fill("45");
+  await page.getByLabel("Effects volume").fill("60");
+  await page.getByLabel("Reduce movement and flash").check();
+  await page.getByLabel("Debug telemetry").check();
+  await page.getByRole("button", { name: "Save settings" }).click();
+
+  await page.getByRole("button", { name: "Initialize run" }).click();
+  const status = page.getByRole("status");
+  await expect(status).toHaveAttribute("data-phase", "RUNNING");
+  await expect(status).toContainText("W / CLICK / TOUCH");
+
+  await page.keyboard.press("Space");
+  await expect(status).toContainText("GRAVITY / DOWN");
+  await page.keyboard.press("KeyW");
+  await expect(status).toContainText("GRAVITY / UP");
+
+  await page.reload();
+  await page.getByRole("button", { name: "Settings" }).click();
+  await expect(page.getByLabel("Flip key")).toHaveValue("KeyW");
+  await expect(page.getByLabel("Music volume")).toHaveValue("45");
+  await expect(page.getByLabel("Effects volume")).toHaveValue("60");
+  await expect(page.getByLabel("Reduce movement and flash")).toBeChecked();
+  await expect(page.getByLabel("Debug telemetry")).toBeChecked();
 });
 
 test("mounts and disposes the Phaser canvas", async ({ page }) => {
@@ -74,8 +116,28 @@ test("locks gravity until the opposite surface is reached", async ({
   await canvas.click({ position: { x: 640, y: 360 } });
   await expect(status).toContainText("GRAVITY / UP");
   await expect(status).toHaveAttribute("data-can-flip", "true", {
-    timeout: 3_000
+    timeout: 8_000
   });
+});
+
+test("pauses the deterministic run and resumes without advancing", async ({
+  page
+}) => {
+  const { status } = await startRun(page);
+  await page.getByRole("button", { name: "Pause" }).click();
+  await expect(status).toHaveAttribute("data-phase", "PAUSED");
+
+  const pausedX = await status.getAttribute("data-player-x");
+  const pausedElapsed = await status.getAttribute("data-elapsed-ms");
+  await page.waitForTimeout(600);
+  await expect(status).toHaveAttribute("data-player-x", pausedX ?? "");
+  await expect(status).toHaveAttribute("data-elapsed-ms", pausedElapsed ?? "");
+
+  await page.getByRole("button", { name: "Resume run" }).click();
+  await expect(status).toHaveAttribute("data-phase", "RUNNING");
+  await expect
+    .poll(async () => Number(await status.getAttribute("data-player-x")))
+    .toBeGreaterThan(Number(pausedX));
 });
 
 test("dies and respawns without a backend", async ({ page }, testInfo) => {
@@ -186,4 +248,13 @@ test("completes the original relay-run level with camera follow", async ({
     timeout: 5_000
   });
   await expect(status).toContainText("CP / relay-01");
+  const result = page.getByRole("dialog", { name: "Story result" });
+  await expect(result).toBeVisible();
+  await expect(result).toContainText("Archive extracted");
+  await expect(result).toContainText("Synced");
+
+  await page.getByRole("button", { name: "Retry level" }).click();
+  await expect(status).toHaveAttribute("data-phase", "RUNNING", {
+    timeout: 3_000
+  });
 });

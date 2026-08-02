@@ -71,6 +71,28 @@ describe("input command controller", () => {
 
     expect(harness.commands).toEqual([]);
   });
+
+  it("reads remapped bindings without rebuilding the controller", () => {
+    let keyboardCode = "Space";
+    const controller = createInputCommandController({
+      bindings: () => [
+        { source: "keyboard", code: keyboardCode, playerId: "player-1" }
+      ],
+      cooldownMs: 0,
+      getClockMs: () => 100,
+      isEnabled: () => true,
+      dispatch: () => undefined
+    });
+
+    expect(
+      controller.handle({ source: "keyboard", code: "Space" })
+    ).not.toBeNull();
+    keyboardCode = "KeyW";
+    expect(controller.handle({ source: "keyboard", code: "Space" })).toBeNull();
+    expect(
+      controller.handle({ source: "keyboard", code: "KeyW" })
+    ).not.toBeNull();
+  });
 });
 
 describe("Phaser input adapter", () => {

@@ -2,6 +2,8 @@ import {
   beginRun,
   createGameSimulation,
   enterMenu,
+  pauseRun,
+  resumeRun,
   stepSimulation,
   type GameSimulation
 } from "@gravity-runner/game-core";
@@ -14,10 +16,7 @@ import Phaser from "phaser";
 
 import type { GameEventBridge } from "../bridge.js";
 import { bindPhaserInput } from "../inputAdapter.js";
-import {
-  createInputCommandController,
-  defaultInputBindings
-} from "../inputController.js";
+import { createInputCommandController } from "../inputController.js";
 import { applyLevelInteractions } from "../levelRuntime.js";
 import { signalVaultLevel } from "../levels/signalVault.js";
 import { syncPlayerBody } from "../playerAdapter.js";
@@ -36,6 +35,10 @@ export class GameScene extends Phaser.Scene {
   private debugBody: Phaser.GameObjects.Graphics | null = null;
   private lastTelemetryAt = Number.NEGATIVE_INFINITY;
   private completionOverlayShown = false;
+  private flipKey = "Space";
+  private reducedEffects = false;
+  private debugEnabled = false;
+  private disposeBridgeControls: (() => void)[] = [];
 
   constructor(private readonly bridge: GameEventBridge) {
     super({ key: "GameScene" });
@@ -87,7 +90,18 @@ export class GameScene extends Phaser.Scene {
     syncPlayerBody(this.runner, this.simulation.state.player);
 
     const inputController = createInputCommandController({
-      bindings: defaultInputBindings,
+      bindings: () => [
+        {
+          source: "keyboard",
+          code: this.flipKey,
+          playerId
+        },
+        {
+          source: "pointer",
+          button: 0,
+          playerId
+        }
+      ],
       cooldownMs: this.simulation.tuning.flipCooldownMs,
       getClockMs: () => this.simulation?.clockMs ?? 0,
       isEnabled: () =>
@@ -100,9 +114,37 @@ export class GameScene extends Phaser.Scene {
       { keyboard: this.input.keyboard, pointer: this.input },
       inputController
     );
+    this.disposeBridgeControls = [
+      this.bridge.on("ui:pause", () => {
+        if (this.simulation !== null) {
+          pauseRun(this.simulation);
+          this.emitTelemetry(this.time.now);
+        }
+      }),
+      this.bridge.on("ui:resume", () => {
+        if (this.simulation !== null) {
+          resumeRun(this.simulation);
+          this.emitTelemetry(this.time.now);
+        }
+      }),
+      this.bridge.on("ui:restart", () => {
+        this.scene.stop("HudScene");
+        this.scene.restart();
+      }),
+      this.bridge.on("settings:changed", (settings) => {
+        this.flipKey = settings.flipKey;
+        this.reducedEffects = settings.reducedEffects;
+        this.debugEnabled = settings.debugOverlay;
+        this.debugBody?.setVisible(this.debugEnabled);
+      })
+    ];
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.disposeInput?.();
       this.disposeInput = null;
+      for (const dispose of this.disposeBridgeControls) {
+        dispose();
+      }
+      this.disposeBridgeControls = [];
       inputController.reset();
     });
 
@@ -306,6 +348,7 @@ export class GameScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(100);
     this.tweens.add({
+      paused: this.reducedEffects,
       targets: text,
       alpha: 0,
       y: text.y - 22,
@@ -313,6 +356,9 @@ export class GameScene extends Phaser.Scene {
       duration: 350,
       onComplete: () => text.destroy()
     });
+    if (this.reducedEffects) {
+      this.time.delayedCall(750, () => text.destroy());
+    }
   }
 
   private showCompletionOverlay(): void {
@@ -366,6 +412,10 @@ export class GameScene extends Phaser.Scene {
     }
     const half = playerSize / 2;
     this.debugBody.clear();
+    this.debugBody.setVisible(this.debugEnabled);
+    if (!this.debugEnabled) {
+      return;
+    }
     this.debugBody.lineStyle(1, 0x72fbc1, 0.75);
     this.debugBody.strokeRect(
       this.runner.x - half,
@@ -410,6 +460,7 @@ export class GameScene extends Phaser.Scene {
       phase: state.phase,
       deaths: state.deaths,
       checkpointId: state.player.checkpointId,
+      elapsedMs: state.elapsedMs,
       tick: Math.round(this.simulation.clockMs / this.simulation.fixedDeltaMs),
       fps: Math.round(this.game.loop.actualFps),
       canFlip: state.phase === "RUNNING" && state.player.isGrounded,

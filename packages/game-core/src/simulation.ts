@@ -373,6 +373,24 @@ export function showResult(simulation: GameSimulation): void {
   }
 }
 
+export function pauseRun(simulation: GameSimulation): void {
+  if (simulation.state.phase !== "RUNNING") {
+    return;
+  }
+
+  simulation.state.phase = "PAUSED";
+  simulation.phaseElapsedMs = 0;
+}
+
+export function resumeRun(simulation: GameSimulation): void {
+  if (simulation.state.phase !== "PAUSED") {
+    return;
+  }
+
+  simulation.state.phase = "RUNNING";
+  simulation.phaseElapsedMs = 0;
+}
+
 export function setSurfaceContact(
   simulation: GameSimulation,
   y: number,

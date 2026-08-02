@@ -60,7 +60,7 @@ function resolvePlayerId(
 }
 
 export function createInputCommandController(options: {
-  bindings: InputBindingMap;
+  bindings: InputBindingMap | (() => InputBindingMap);
   cooldownMs: number;
   getClockMs(): number;
   isEnabled(): boolean;
@@ -70,7 +70,11 @@ export function createInputCommandController(options: {
 
   return {
     handle(input): GameCommand | null {
-      const playerId = resolvePlayerId(options.bindings, input);
+      const bindings =
+        typeof options.bindings === "function"
+          ? options.bindings()
+          : options.bindings;
+      const playerId = resolvePlayerId(bindings, input);
       if (playerId === null || !options.isEnabled()) {
         return null;
       }
