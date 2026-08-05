@@ -30,6 +30,9 @@ export class GameScene extends Phaser.Scene {
   private simulation: GameSimulation | null = null;
   private queuedCommands: GameCommand[] = [];
   private runner: Phaser.Physics.Arcade.Image | null = null;
+  private previousGrounded = false;
+  private runnerStateUntil = 0;
+  private runnerTextureKey = "runner-run-a";
   private disposeInput: (() => void) | null = null;
   private emittedEventCount = 0;
   private debugBody: Phaser.GameObjects.Graphics | null = null;
@@ -54,7 +57,7 @@ export class GameScene extends Phaser.Scene {
     this.runner = this.physics.add.image(
       this.level.spawn.x,
       this.level.spawn.y,
-      "runner-placeholder"
+      "runner-run-a"
     );
     this.runner.setGravity(0, 0);
     this.runner.setDepth(30);
@@ -88,6 +91,7 @@ export class GameScene extends Phaser.Scene {
       playerSize
     );
     syncPlayerBody(this.runner, this.simulation.state.player);
+    this.previousGrounded = this.simulation.state.player.isGrounded;
 
     const inputController = createInputCommandController({
       bindings: () => [
@@ -173,6 +177,7 @@ export class GameScene extends Phaser.Scene {
       playerSize
     );
     syncPlayerBody(this.runner, this.simulation.state.player);
+    this.updateRunnerPresentation(time);
     this.drawDebugBody();
 
     if (this.simulation.events.length !== this.emittedEventCount) {
@@ -195,6 +200,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private renderLevel(level: LevelManifest): void {
+    this.renderParallax(level);
     const grid = this.add.graphics().setDepth(-10);
     grid.lineStyle(1, 0x15364d, 0.42);
     for (let x = 0; x <= level.width; x += 64) {
@@ -324,14 +330,90 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  private renderParallax(level: LevelManifest): void {
+    const far = this.add.graphics().setDepth(-30).setScrollFactor(0.12);
+    far.fillStyle(0x071827, 1);
+    far.fillRect(0, 0, level.width + 1800, level.height);
+    far.fillStyle(0x0b2638, 0.92);
+    for (let x = 0; x < level.width + 1800; x += 180) {
+      const height = 90 + ((x / 180) % 4) * 34;
+      far.fillRect(x, level.height - 72 - height, 120, height);
+      far.fillCircle(x + 30, level.height - 96 - height, 3);
+      far.fillCircle(x + 62, level.height - 112 - height, 3);
+    }
+
+    const near = this.add.graphics().setDepth(-20).setScrollFactor(0.32);
+    near.fillStyle(0x123247, 0.6);
+    for (let x = 0; x < level.width + 1400; x += 260) {
+      near.fillTriangle(
+        x,
+        level.height - 72,
+        x + 150,
+        level.height - 310,
+        x + 330,
+        level.height - 72
+      );
+      near.lineStyle(2, 0x2b6680, 0.32);
+      near.lineBetween(x + 150, level.height - 310, x + 150, level.height - 72);
+    }
+  }
+
+  private updateRunnerPresentation(time: number): void {
+    if (this.runner === null || this.simulation === null) {
+      return;
+    }
+    const player = this.simulation.state.player;
+    if (!player.alive || this.simulation.state.phase === "DEAD") {
+      this.setRunnerTexture("runner-death");
+      return;
+    }
+    if (this.simulation.state.phase === "CHECKPOINT_RESPAWN") {
+      this.setRunnerTexture("runner-land");
+      this.runnerStateUntil = time + 280;
+      return;
+    }
+    if (time < this.runnerStateUntil) {
+      return;
+    }
+    if (!player.isGrounded) {
+      this.setRunnerTexture("runner-flip");
+      return;
+    }
+    this.setRunnerTexture(
+      Math.floor(this.simulation.state.elapsedMs / 180) % 2 === 0
+        ? "runner-run-a"
+        : "runner-run-b"
+    );
+    if (!this.previousGrounded && player.isGrounded) {
+      this.setRunnerTexture("runner-land");
+      this.runnerStateUntil = time + 220;
+    }
+    this.previousGrounded = player.isGrounded;
+  }
+
   private handleEvents(events: readonly GameEvent[]): void {
     for (const event of events) {
       if (event.type === "CHECKPOINT_REACHED") {
         this.flashMessage("RELAY SYNCHRONIZED", "#72fbc1");
+        this.runnerStateUntil = this.time.now + 220;
+        this.setRunnerTexture("runner-land");
+      } else if (event.type === "PLAYER_FLIPPED") {
+        this.runnerStateUntil = this.time.now + 300;
+        this.setRunnerTexture("runner-flip");
       } else if (event.type === "PLAYER_DIED") {
         this.flashMessage("SIGNAL LOST · RESTORING", "#ffc857");
+        this.runnerStateUntil = Number.POSITIVE_INFINITY;
+        this.setRunnerTexture("runner-death");
       }
     }
+  }
+
+  private setRunnerTexture(key: string): void {
+    if (this.runner === null || this.runnerTextureKey === key) {
+      return;
+    }
+    this.runnerTextureKey = key;
+    this.runner.setTexture(key);
   }
 
   private flashMessage(message: string, color: string): void {

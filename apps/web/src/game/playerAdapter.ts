@@ -18,5 +18,7 @@ export function syncPlayerBody(
   body.setFlipY(player.gravityDirection === -1);
   body.setAlpha(player.alive ? 1 : 0.35);
   body.setActive(player.alive);
-  body.setVisible(player.alive);
+  // Keep the body visible during death so the presentation layer can show
+  // its authored death state before the checkpoint respawn countdown.
+  body.setVisible(true);
 }
