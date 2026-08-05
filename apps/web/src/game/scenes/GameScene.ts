@@ -48,6 +48,8 @@ export class GameScene extends Phaser.Scene {
   private disposeInput: (() => void) | null = null;
   private emittedEventCount = 0;
   private debugBody: Phaser.GameObjects.Graphics | null = null;
+  private pursuerVisual: Phaser.GameObjects.Graphics | null = null;
+  private pursuerLabel: Phaser.GameObjects.Text | null = null;
   private lastTelemetryAt = Number.NEGATIVE_INFINITY;
   private completionOverlayShown = false;
   private flipKey = "Space";
@@ -80,6 +82,18 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.startFollow(this.runner, true, 1, 1);
 
     this.debugBody = this.add.graphics().setDepth(40);
+    if (this.level.id === "signal-vault-03") {
+      this.pursuerVisual = this.add.graphics().setDepth(25);
+      this.pursuerLabel = this.add
+        .text(0, 0, "PURSUER", {
+          color: "#ff6b8a",
+          fontFamily: "monospace",
+          fontSize: "11px",
+          fontStyle: "bold"
+        })
+        .setDepth(26)
+        .setOrigin(0.5, 1);
+    }
     const simulationOptions = {
       levelId: this.level.id,
       levelVersion: this.level.version,
@@ -197,6 +211,7 @@ export class GameScene extends Phaser.Scene {
     );
     syncPlayerBody(this.runner, this.simulation.state.player);
     this.updateRunnerPresentation(time);
+    this.drawPursuer();
     this.drawDebugBody();
 
     if (this.simulation.events.length !== this.emittedEventCount) {
@@ -530,6 +545,41 @@ export class GameScene extends Phaser.Scene {
       this.runner.x,
       this.runner.y +
         (this.simulation?.state.player.gravityDirection === 1 ? 34 : -34)
+    );
+  }
+
+  private drawPursuer(): void {
+    if (
+      this.simulation === null ||
+      this.pursuerVisual === null ||
+      this.pursuerLabel === null ||
+      this.simulation.pursuit === null
+    ) {
+      return;
+    }
+
+    const player = this.simulation.state.player;
+    const x = this.simulation.pursuerX;
+    const y = player.y;
+    const distance = getPursuitDistance(this.simulation) ?? 0;
+    const intensity = Math.max(0.22, Math.min(1, 1 - (distance - 72) / 560));
+
+    this.pursuerVisual.clear();
+    this.pursuerVisual.lineStyle(3, 0xff466f, 0.2 + intensity * 0.55);
+    this.pursuerVisual.strokeCircle(x, y, 34 + intensity * 8);
+    this.pursuerVisual.fillStyle(0x3a1029, 0.86);
+    this.pursuerVisual.fillCircle(x, y, 24);
+    this.pursuerVisual.lineStyle(2, 0xff6b8a, 0.9);
+    this.pursuerVisual.strokeCircle(x, y, 18);
+    this.pursuerVisual.fillStyle(0xff466f, 0.95);
+    this.pursuerVisual.fillTriangle(x - 9, y - 8, x + 11, y, x - 9, y + 8);
+    this.pursuerVisual.lineStyle(4, 0xff466f, 0.25 + intensity * 0.4);
+    this.pursuerVisual.lineBetween(x - 72, y, x - 30, y);
+    this.pursuerLabel.setPosition(x, y - 38);
+    this.pursuerLabel.setAlpha(
+      this.simulation.state.phase === "LEVEL_COMPLETE"
+        ? 0
+        : 0.65 + intensity * 0.35
     );
   }
 
