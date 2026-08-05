@@ -1,0 +1,4 @@
+interface:
+  display_name: "玩家視角完成回報"
+  short_description: "完成每個 phase 後產生玩家視角與實測步驟回報"
+  default_prompt: "Use $player-facing-task-report to summarize the completed task from a player's perspective and provide concrete test steps."
