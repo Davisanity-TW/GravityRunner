@@ -31,9 +31,9 @@ const playerSize = 48;
 const telemetryIntervalMs = 180;
 const pressurePursuit: PursuitConfig = {
   enabled: true,
-  gracePeriodMs: 3200,
+  gracePeriodMs: 4500,
   initialDistance: 560,
-  speed: 285,
+  speed: 270,
   catchDistance: 72
 };
 

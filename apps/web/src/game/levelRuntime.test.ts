@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 
 import { applyLevelInteractions } from "./levelRuntime.js";
 import { signalVaultLevel } from "./levels/signalVault.js";
+import { signalPressureLevel } from "./levels/storyLevels.js";
 
 const tuning = {
   tickRateHz: 60,
@@ -32,6 +33,31 @@ function createRunningSimulation() {
   beginRun(simulation);
   stepSimulation(simulation, simulation.fixedDeltaMs);
   applyLevelInteractions(simulation, signalVaultLevel, simulation.clockMs);
+  return simulation;
+}
+
+function createRunningPressureSimulation() {
+  const simulation = createGameSimulation({
+    levelId: signalPressureLevel.id,
+    levelVersion: signalPressureLevel.version,
+    playerId: "player-1",
+    spawn: signalPressureLevel.spawn,
+    tuning: {
+      ...tuning,
+      runSpeed: signalPressureLevel.runSpeed
+    },
+    pursuit: {
+      enabled: true,
+      gracePeriodMs: 4500,
+      initialDistance: 560,
+      speed: 270,
+      catchDistance: 72
+    }
+  });
+  enterMenu(simulation);
+  beginRun(simulation);
+  stepSimulation(simulation, simulation.fixedDeltaMs);
+  applyLevelInteractions(simulation, signalPressureLevel, simulation.clockMs);
   return simulation;
 }
 
@@ -129,5 +155,54 @@ describe("data-driven level interactions", () => {
     expect(simulation.state.deaths).toBe(0);
     expect(simulation.state.player.checkpointId).toBe("relay-01");
     expect(simulation.state.phase).toBe("LEVEL_COMPLETE");
+  });
+
+  it("completes the Pressure Finale route with deterministic pressure respawns", () => {
+    const simulation = createRunningPressureSimulation();
+    const flipAt = [700, 1250, 1900, 2800, 3500];
+    let nextFlip = 0;
+
+    for (let frame = 0; frame < 1_800; frame += 1) {
+      const commands = [];
+      const threshold = flipAt[nextFlip];
+      if (
+        threshold !== undefined &&
+        simulation.state.player.isGrounded &&
+        simulation.state.player.x >= threshold
+      ) {
+        commands.push({
+          type: "FLIP_GRAVITY" as const,
+          atMs: Math.floor(simulation.clockMs),
+          playerId: "player-1"
+        });
+        nextFlip += 1;
+      }
+
+      stepSimulation(simulation, simulation.fixedDeltaMs, commands);
+      applyLevelInteractions(
+        simulation,
+        signalPressureLevel,
+        simulation.clockMs
+      );
+      if (simulation.state.phase === "LEVEL_COMPLETE") {
+        break;
+      }
+    }
+
+    expect(simulation.state.deaths).toBe(2);
+    expect(simulation.state.player.checkpointId).toBe("pressure-02");
+    expect(simulation.state.phase).toBe("LEVEL_COMPLETE");
+    expect(simulation.events.map((event) => event.type)).toEqual([
+      "PLAYER_FLIPPED",
+      "PLAYER_FLIPPED",
+      "PLAYER_FLIPPED",
+      "CHECKPOINT_REACHED",
+      "PLAYER_DIED",
+      "PLAYER_FLIPPED",
+      "PLAYER_DIED",
+      "PLAYER_FLIPPED",
+      "CHECKPOINT_REACHED",
+      "LEVEL_COMPLETED"
+    ]);
   });
 });
