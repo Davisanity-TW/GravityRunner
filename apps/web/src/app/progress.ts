@@ -32,16 +32,16 @@ export const storyLevels: readonly StoryLevelDefinition[] = [
     code: "SV-02",
     title: "Switchback",
     subtitle: "Teaching Mastery",
-    description: "A denser alternating route is waiting to be authored.",
-    runtimeAvailable: false
+    description: "A denser alternating route teaches the switchback rhythm.",
+    runtimeAvailable: true
   },
   {
     id: "signal-vault-03",
     code: "SV-03",
     title: "Pressure Finale",
     subtitle: "Archive Core",
-    description: "The final pressure route will unlock after Switchback.",
-    runtimeAvailable: false
+    description: "A violet finale combines every mastered surface pattern.",
+    runtimeAvailable: true
   }
 ];
 

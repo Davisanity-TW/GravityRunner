@@ -223,7 +223,7 @@ function StoryLevelSelect({
                 {playable
                   ? level.id === "signal-vault-01"
                     ? "Initialize run"
-                    : "Content queued"
+                    : "Start level"
                   : status === "locked"
                     ? "Complete previous level"
                     : "Content queued"}
@@ -427,6 +427,7 @@ export function App() {
               onOpenSettings={() => setSettingsOpen(true)}
               onExitToMenu={() => setScreen("levels")}
               onLevelComplete={completeLevel}
+              levelId={selectedLevelId}
             />
           </Suspense>
         </section>

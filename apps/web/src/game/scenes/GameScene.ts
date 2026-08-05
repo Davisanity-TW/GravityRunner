@@ -18,7 +18,10 @@ import type { GameEventBridge } from "../bridge.js";
 import { bindPhaserInput } from "../inputAdapter.js";
 import { createInputCommandController } from "../inputController.js";
 import { applyLevelInteractions } from "../levelRuntime.js";
-import { signalVaultLevel } from "../levels/signalVault.js";
+import {
+  getStoryLevelManifest,
+  type StoryRuntimeLevelId
+} from "../levels/storyLevels.js";
 import { syncPlayerBody } from "../playerAdapter.js";
 
 const playerId = "player-1";
@@ -26,7 +29,7 @@ const playerSize = 48;
 const telemetryIntervalMs = 180;
 
 export class GameScene extends Phaser.Scene {
-  private readonly level: LevelManifest = signalVaultLevel;
+  private level: LevelManifest = getStoryLevelManifest("signal-vault-01");
   private simulation: GameSimulation | null = null;
   private queuedCommands: GameCommand[] = [];
   private runner: Phaser.Physics.Arcade.Image | null = null;
@@ -48,6 +51,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.level = getStoryLevelManifest(
+      this.bridge.selectedLevelId as StoryRuntimeLevelId
+    );
     this.bridge.emit("scene:changed", { scene: "GAME" });
     this.cameras.main.setBackgroundColor(0x06101e);
     this.cameras.main.setBounds(0, 0, this.level.width, this.level.height);

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { GameSettings } from "../app/settings.js";
 import { flipKeyLabels } from "../app/settings.js";
+import type { StoryLevelId } from "../app/progress.js";
 import { GameEventBridge } from "./bridge.js";
 import { phaserLifecycle } from "./lifecycle.js";
 
@@ -10,6 +11,7 @@ type GameCanvasProps = {
   onOpenSettings(): void;
   onExitToMenu(): void;
   onLevelComplete(elapsedMs: number): void;
+  levelId: StoryLevelId;
 };
 
 function formatElapsed(elapsedMs: number): string {
@@ -26,7 +28,8 @@ export function GameCanvas({
   settings,
   onOpenSettings,
   onExitToMenu,
-  onLevelComplete
+  onLevelComplete,
+  levelId
 }: GameCanvasProps) {
   const exposeDebugState = (
     import.meta as ImportMeta & { env: { DEV: boolean } }
@@ -76,6 +79,7 @@ export function GameCanvas({
         onLevelComplete(state.elapsedMs);
       }
     });
+    bridge.selectedLevelId = levelId;
     const runtime = phaserLifecycle.mount(container, bridge);
 
     return () => {
@@ -85,7 +89,7 @@ export function GameCanvas({
       offScene();
       runtime.dispose();
     };
-  }, [bridge, onLevelComplete]);
+  }, [bridge, levelId, onLevelComplete]);
 
   const pause = () => bridge.emit("ui:pause", {});
   const resume = () => bridge.emit("ui:resume", {});
