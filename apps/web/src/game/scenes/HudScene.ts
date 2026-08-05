@@ -81,6 +81,10 @@ export class HudScene extends Phaser.Scene {
       this.gravityLabel?.setText(
         `GRAVITY / ${this.currentGravity} · FLIP / ${
           state.canFlip ? "READY" : "LOCKED"
+        }${
+          state.pursuitDistance !== null && state.pursuitDistance < 180
+            ? " · THREAT CLOSE"
+            : ""
         }`
       );
       this.debugLabel?.setText(
