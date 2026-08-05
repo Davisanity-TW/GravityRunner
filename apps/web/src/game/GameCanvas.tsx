@@ -26,6 +26,9 @@ export function GameCanvas({
   onOpenSettings,
   onExitToMenu
 }: GameCanvasProps) {
+  const exposeDebugState = (
+    import.meta as ImportMeta & { env: { DEV: boolean } }
+  ).env.DEV;
   const containerRef = useRef<HTMLDivElement>(null);
   const settingsRef = useRef(settings);
   const bridge = useMemo(() => new GameEventBridge(), []);
@@ -122,22 +125,28 @@ export function GameCanvas({
       <div
         className="game-frame__status"
         role="status"
-        data-phase={runState.phase}
-        data-player-x={Math.round(runState.x)}
-        data-camera-x={Math.round(runState.cameraX)}
-        data-player-screen-x={Math.round(runState.x - runState.cameraX)}
-        data-can-flip={runState.canFlip}
-        data-deaths={runState.deaths}
-        data-elapsed-ms={runState.elapsedMs}
+        {...(exposeDebugState
+          ? {
+              "data-phase": runState.phase,
+              "data-player-x": Math.round(runState.x),
+              "data-camera-x": Math.round(runState.cameraX),
+              "data-player-screen-x": Math.round(runState.x - runState.cameraX),
+              "data-can-flip": runState.canFlip,
+              "data-deaths": runState.deaths,
+              "data-elapsed-ms": runState.elapsedMs
+            }
+          : {})}
       >
         <span className="live-dot">{runtimeStatus}</span>
-        <span>
-          {runState.phase} · GRAVITY / {gravity} · FLIP /{" "}
-          {runState.canFlip ? "READY" : "LOCKED"} ·{" "}
-          {flipKeyLabels[settings.flipKey]} / CLICK / TOUCH · DEATHS /{" "}
-          {runState.deaths} · CP / {runState.checkpointId ?? "NONE"} · SCENE /{" "}
-          {activeScene}
-        </span>
+        {exposeDebugState ? (
+          <span>
+            {runState.phase} · GRAVITY / {gravity} · FLIP /{" "}
+            {runState.canFlip ? "READY" : "LOCKED"} ·{" "}
+            {flipKeyLabels[settings.flipKey]} / CLICK / TOUCH · DEATHS /{" "}
+            {runState.deaths} · CP / {runState.checkpointId ?? "NONE"} · SCENE /{" "}
+            {activeScene}
+          </span>
+        ) : null}
       </div>
       <div
         ref={containerRef}
