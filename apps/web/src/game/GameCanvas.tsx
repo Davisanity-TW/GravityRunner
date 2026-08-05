@@ -9,6 +9,7 @@ type GameCanvasProps = {
   settings: GameSettings;
   onOpenSettings(): void;
   onExitToMenu(): void;
+  onLevelComplete(elapsedMs: number): void;
 };
 
 function formatElapsed(elapsedMs: number): string {
@@ -24,13 +25,15 @@ function formatElapsed(elapsedMs: number): string {
 export function GameCanvas({
   settings,
   onOpenSettings,
-  onExitToMenu
+  onExitToMenu,
+  onLevelComplete
 }: GameCanvasProps) {
   const exposeDebugState = (
     import.meta as ImportMeta & { env: { DEV: boolean } }
   ).env.DEV;
   const containerRef = useRef<HTMLDivElement>(null);
   const settingsRef = useRef(settings);
+  const completionReported = useRef(false);
   const bridge = useMemo(() => new GameEventBridge(), []);
   const [runtimeStatus, setRuntimeStatus] = useState("Starting runtime…");
   const [activeScene, setActiveScene] = useState("BOOT");
@@ -68,6 +71,10 @@ export function GameCanvas({
     });
     const offTelemetry = bridge.on("run:telemetry", (state) => {
       setRunState(state);
+      if (state.phase === "LEVEL_COMPLETE" && !completionReported.current) {
+        completionReported.current = true;
+        onLevelComplete(state.elapsedMs);
+      }
     });
     const runtime = phaserLifecycle.mount(container, bridge);
 
@@ -78,7 +85,7 @@ export function GameCanvas({
       offScene();
       runtime.dispose();
     };
-  }, [bridge]);
+  }, [bridge, onLevelComplete]);
 
   const pause = () => bridge.emit("ui:pause", {});
   const resume = () => bridge.emit("ui:resume", {});

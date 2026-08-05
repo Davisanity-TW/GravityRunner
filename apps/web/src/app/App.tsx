@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 
 import {
   defaultGameSettings,
@@ -8,13 +8,23 @@ import {
   type FlipKey,
   type GameSettings
 } from "./settings.js";
+import {
+  completeStoryLevel,
+  formatBestTime,
+  getStoryLevelStatus,
+  loadStoryProgress,
+  saveStoryProgress,
+  storyLevels,
+  type StoryLevelId,
+  type StoryProgress
+} from "./progress.js";
 
 const GameCanvas = lazy(async () => {
   const module = await import("../game/GameCanvas.js");
   return { default: module.GameCanvas };
 });
 
-type AppScreen = "menu" | "game";
+type AppScreen = "menu" | "levels" | "game";
 
 type SettingsPanelProps = {
   settings: GameSettings;
@@ -145,10 +155,94 @@ function SettingsPanel({ settings, onChange, onClose }: SettingsPanelProps) {
   );
 }
 
+function StoryLevelSelect({
+  progress,
+  onSelect,
+  onBack
+}: {
+  progress: StoryProgress;
+  onSelect(levelId: StoryLevelId): void;
+  onBack(): void;
+}) {
+  return (
+    <section className="story-level-select" aria-labelledby="story-level-title">
+      <div className="level-select-heading">
+        <div>
+          <p className="eyebrow">STORY / CAMPAIGN MAP</p>
+          <h1 id="story-level-title">Choose a relay.</h1>
+          <p className="lede">
+            Complete each original route to unlock the next signal in the
+            archive. Your best times stay on this device.
+          </p>
+        </div>
+        <button className="text-button" type="button" onClick={onBack}>
+          ← Return to mode select
+        </button>
+      </div>
+
+      <div className="level-grid" role="region" aria-label="Story levels">
+        {storyLevels.map((level) => {
+          const status = getStoryLevelStatus(progress, level.id);
+          const playable = status !== "locked" && level.runtimeAvailable;
+          const statusLabel =
+            status === "completed"
+              ? "COMPLETED"
+              : status === "available"
+                ? level.runtimeAvailable
+                  ? "AVAILABLE"
+                  : "UNLOCKED · AUTHORING"
+                : "LOCKED";
+          return (
+            <article
+              className={`level-card level-card--${status}`}
+              key={level.id}
+            >
+              <div className="mode-card__topline">
+                <span>{level.code}</span>
+                <span>{statusLabel}</span>
+              </div>
+              <h2>{level.title}</h2>
+              <p className="level-card__subtitle">{level.subtitle}</p>
+              <p>{level.description}</p>
+              <dl className="level-card__meta">
+                <div>
+                  <dt>Status</dt>
+                  <dd>{status}</dd>
+                </div>
+                <div>
+                  <dt>Best time</dt>
+                  <dd>{formatBestTime(progress.bestTimesMs[level.id])}</dd>
+                </div>
+              </dl>
+              <button
+                className={playable ? "play-button" : "locked-button"}
+                type="button"
+                disabled={!playable}
+                onClick={() => onSelect(level.id)}
+              >
+                {playable
+                  ? level.id === "signal-vault-01"
+                    ? "Initialize run"
+                    : "Content queued"
+                  : status === "locked"
+                    ? "Complete previous level"
+                    : "Content queued"}
+              </button>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export function App() {
   const [screen, setScreen] = useState<AppScreen>("menu");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settings, setSettings] = useState(loadGameSettings);
+  const [progress, setProgress] = useState(loadStoryProgress);
+  const [selectedLevelId, setSelectedLevelId] =
+    useState<StoryLevelId>("signal-vault-01");
 
   useEffect(() => {
     saveGameSettings(settings);
@@ -156,6 +250,19 @@ export function App() {
       settings.reducedEffects
     );
   }, [settings]);
+
+  useEffect(() => {
+    saveStoryProgress(progress);
+  }, [progress]);
+
+  const completeLevel = useCallback(
+    (elapsedMs: number) => {
+      setProgress((current) =>
+        completeStoryLevel(current, selectedLevelId, elapsedMs)
+      );
+    },
+    [selectedLevelId]
+  );
 
   return (
     <main className="app-shell">
@@ -222,11 +329,18 @@ export function App() {
                 </div>
                 <div>
                   <dt>Best</dt>
-                  <dd>—</dd>
+                  <dd>
+                    {formatBestTime(progress.bestTimesMs["signal-vault-01"])}
+                  </dd>
                 </div>
                 <div>
                   <dt>Status</dt>
-                  <dd>Unlocked</dd>
+                  <dd>
+                    {getStoryLevelStatus(progress, "signal-vault-01") ===
+                    "completed"
+                      ? "Completed"
+                      : "Unlocked"}
+                  </dd>
                 </div>
               </dl>
               <button
@@ -236,6 +350,13 @@ export function App() {
               >
                 <span>Initialize run</span>
                 <span aria-hidden="true">→</span>
+              </button>
+              <button
+                className="text-button mode-card__levels-link"
+                type="button"
+                onClick={() => setScreen("levels")}
+              >
+                View Story level select →
               </button>
             </article>
 
@@ -270,6 +391,15 @@ export function App() {
             ))}
           </div>
         </section>
+      ) : screen === "levels" ? (
+        <StoryLevelSelect
+          progress={progress}
+          onBack={() => setScreen("menu")}
+          onSelect={(levelId) => {
+            setSelectedLevelId(levelId);
+            setScreen("game");
+          }}
+        />
       ) : (
         <section className="runtime-screen" aria-label="Game runtime">
           <div className="runtime-toolbar">
@@ -280,7 +410,7 @@ export function App() {
             <button
               className="text-button"
               type="button"
-              onClick={() => setScreen("menu")}
+              onClick={() => setScreen("levels")}
             >
               ← Return to mission control
             </button>
@@ -295,7 +425,8 @@ export function App() {
             <GameCanvas
               settings={settings}
               onOpenSettings={() => setSettingsOpen(true)}
-              onExitToMenu={() => setScreen("menu")}
+              onExitToMenu={() => setScreen("levels")}
+              onLevelComplete={completeLevel}
             />
           </Suspense>
         </section>

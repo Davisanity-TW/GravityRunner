@@ -41,6 +41,56 @@ test("opens the web application shell", async ({ page }) => {
   );
 });
 
+test("opens Story level select with explicit campaign states", async ({
+  page
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "View Story level select" }).click();
+
+  await expect(
+    page.getByRole("heading", { name: "Choose a relay." })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "Story levels" })
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Relay Run" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Switchback" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Pressure Finale" })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Complete previous level" })
+  ).toHaveCount(2);
+  await expect(
+    page.getByRole("button", { name: "Initialize run" })
+  ).toBeVisible();
+});
+
+test("hydrates Story progress from the offline snapshot", async ({ page }) => {
+  await page.goto("/");
+  await page.evaluate(() => {
+    window.localStorage.setItem(
+      "gravity-runner.story-progress.v1",
+      JSON.stringify({
+        unlocked: ["signal-vault-01", "signal-vault-02"],
+        completed: ["signal-vault-01"],
+        bestTimesMs: { "signal-vault-01": 12_340 }
+      })
+    );
+  });
+  await page.reload();
+  await page.getByRole("button", { name: "View Story level select" }).click();
+
+  await expect(page.getByText("COMPLETED", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("UNLOCKED · AUTHORING", { exact: true })
+  ).toBeVisible();
+  await expect(page.getByText("00:12")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Content queued" })
+  ).toBeDisabled();
+});
+
 test("persists settings and remaps the keyboard flip action", async ({
   page
 }) => {
