@@ -212,4 +212,91 @@ describe("commands and lifecycle events", () => {
     expect(simulation.state.phase).toBe("RUNNING");
     expect(simulation.runTicks).toBe(beforePause.runTicks + 1);
   });
+
+  it("applies deterministic pursuit pressure and emits a pursuer death", () => {
+    const simulation = createGameSimulation({
+      levelId: "signal-vault-03",
+      levelVersion: 1,
+      playerId: "player-1",
+      spawn: { x: 100, y: 600, gravityDirection: 1 },
+      tuning,
+      pursuit: {
+        enabled: true,
+        gracePeriodMs: 100,
+        initialDistance: 120,
+        speed: 1200,
+        catchDistance: 24
+      }
+    });
+    enterMenu(simulation);
+    beginRun(simulation);
+    stepSimulation(simulation, 500);
+
+    expect(simulation.state.phase).toBe("DEAD");
+    expect(simulation.events.at(-1)).toMatchObject({
+      type: "PLAYER_DIED",
+      cause: "pursuer"
+    });
+    expect(getSimulationResult(simulation)).toEqual(
+      getSimulationResult(createPursuitReplay())
+    );
+  });
+
+  it("resets the pursuer at the latest checkpoint on respawn", () => {
+    const simulation = createRunningPursuitSimulation();
+    reachCheckpoint(simulation, {
+      id: "pressure-01",
+      x: 640,
+      y: 600,
+      gravityDirection: 1,
+      atMs: 300
+    });
+    killPlayer(simulation, "hazard", 400);
+    stepSimulation(simulation, simulation.fixedDeltaMs * 18);
+
+    expect(simulation.pursuerX).toBe(520);
+    expect(simulation.state.player.x).toBe(640);
+  });
 });
+
+function createRunningPursuitSimulation(): GameSimulation {
+  const simulation = createGameSimulation({
+    levelId: "signal-vault-03",
+    levelVersion: 1,
+    playerId: "player-1",
+    spawn: { x: 100, y: 600, gravityDirection: 1 },
+    tuning,
+    pursuit: {
+      enabled: true,
+      gracePeriodMs: 1000,
+      initialDistance: 120,
+      speed: 260,
+      catchDistance: 24
+    }
+  });
+  enterMenu(simulation);
+  beginRun(simulation);
+  stepSimulation(simulation, 250);
+  return simulation;
+}
+
+function createPursuitReplay(): GameSimulation {
+  const simulation = createGameSimulation({
+    levelId: "signal-vault-03",
+    levelVersion: 1,
+    playerId: "player-1",
+    spawn: { x: 100, y: 600, gravityDirection: 1 },
+    tuning,
+    pursuit: {
+      enabled: true,
+      gracePeriodMs: 100,
+      initialDistance: 120,
+      speed: 1200,
+      catchDistance: 24
+    }
+  });
+  enterMenu(simulation);
+  beginRun(simulation);
+  stepSimulation(simulation, 500);
+  return simulation;
+}

@@ -18,12 +18,21 @@ export class HudScene extends Phaser.Scene {
     this.bridge.emit("scene:changed", { scene: "HUD" });
 
     this.add
-      .text(28, 24, "SV-01 / RELAY RUN", {
-        color: "#72fbc1",
-        fontFamily: "monospace",
-        fontSize: "15px",
-        fontStyle: "bold"
-      })
+      .text(
+        28,
+        24,
+        this.bridge.selectedLevelId === "signal-vault-03"
+          ? "SV-03 / PRESSURE FINALE"
+          : this.bridge.selectedLevelId === "signal-vault-02"
+            ? "SV-02 / SWITCHBACK"
+            : "SV-01 / RELAY RUN",
+        {
+          color: "#72fbc1",
+          fontFamily: "monospace",
+          fontSize: "15px",
+          fontStyle: "bold"
+        }
+      )
       .setScrollFactor(0);
 
     this.add
@@ -77,7 +86,11 @@ export class HudScene extends Phaser.Scene {
       this.debugLabel?.setText(
         `TICK ${state.tick.toString().padStart(6, "0")} · ${state.fps} FPS · CP ${
           state.checkpointId ?? "NONE"
-        } · X ${Math.round(state.x)}`
+        } · X ${Math.round(state.x)}${
+          state.pursuitDistance === null
+            ? ""
+            : ` · PURSUER ${Math.round(state.pursuitDistance)}`
+        }`
       );
     });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {

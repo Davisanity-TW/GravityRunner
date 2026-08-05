@@ -2,10 +2,12 @@ import {
   beginRun,
   createGameSimulation,
   enterMenu,
+  getPursuitDistance,
   pauseRun,
   resumeRun,
   stepSimulation,
-  type GameSimulation
+  type GameSimulation,
+  type PursuitConfig
 } from "@gravity-runner/game-core";
 import type {
   GameCommand,
@@ -27,6 +29,13 @@ import { syncPlayerBody } from "../playerAdapter.js";
 const playerId = "player-1";
 const playerSize = 48;
 const telemetryIntervalMs = 180;
+const pressurePursuit: PursuitConfig = {
+  enabled: true,
+  gracePeriodMs: 3200,
+  initialDistance: 560,
+  speed: 285,
+  catchDistance: 72
+};
 
 export class GameScene extends Phaser.Scene {
   private level: LevelManifest = getStoryLevelManifest("signal-vault-01");
@@ -71,7 +80,7 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.startFollow(this.runner, true, 1, 1);
 
     this.debugBody = this.add.graphics().setDepth(40);
-    this.simulation = createGameSimulation({
+    const simulationOptions = {
       levelId: this.level.id,
       levelVersion: this.level.version,
       playerId,
@@ -85,8 +94,12 @@ export class GameScene extends Phaser.Scene {
         flipCooldownMs: 100,
         respawnDelayMs: 450,
         countdownMs: 0
-      }
-    });
+      },
+      ...(this.level.id === "signal-vault-03"
+        ? { pursuit: pressurePursuit }
+        : {})
+    };
+    this.simulation = createGameSimulation(simulationOptions);
     enterMenu(this.simulation);
     beginRun(this.simulation);
     stepSimulation(this.simulation, this.simulation.fixedDeltaMs);
@@ -553,7 +566,8 @@ export class GameScene extends Phaser.Scene {
       fps: Math.round(this.game.loop.actualFps),
       canFlip: state.phase === "RUNNING" && state.player.isGrounded,
       x: state.player.x,
-      cameraX: this.cameras.main.scrollX
+      cameraX: this.cameras.main.scrollX,
+      pursuitDistance: getPursuitDistance(this.simulation)
     });
   }
 }

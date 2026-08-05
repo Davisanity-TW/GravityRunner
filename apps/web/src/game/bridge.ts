@@ -44,6 +44,7 @@ export type GameBridgeEventMap = {
     canFlip: boolean;
     x: number;
     cameraX: number;
+    pursuitDistance: number | null;
   };
 };
 

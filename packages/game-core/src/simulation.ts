@@ -19,6 +19,15 @@ export type CreateSimulationOptions = {
   playerId: string;
   spawn: SimulationPoint;
   tuning: GameTuningConfig;
+  pursuit?: PursuitConfig;
+};
+
+export type PursuitConfig = {
+  enabled: boolean;
+  gracePeriodMs: number;
+  initialDistance: number;
+  speed: number;
+  catchDistance: number;
 };
 
 export type SimulationResult = {
@@ -38,6 +47,9 @@ export type GameSimulation = {
   readonly playerId: string;
   readonly fixedDeltaMs: number;
   readonly spawn: SimulationPoint;
+  readonly pursuit: PursuitConfig | null;
+  pursuerX: number;
+  pursuitElapsedMs: number;
   clockMs: number;
   accumulatorMs: number;
   phaseElapsedMs: number;
@@ -97,6 +109,9 @@ export function createGameSimulation(
     playerId: options.playerId,
     fixedDeltaMs: 1000 / options.tuning.tickRateHz,
     spawn,
+    pursuit: options.pursuit ? { ...options.pursuit } : null,
+    pursuerX: spawn.x - (options.pursuit?.initialDistance ?? 0),
+    pursuitElapsedMs: 0,
     clockMs: 0,
     accumulatorMs: 0,
     phaseElapsedMs: 0,
@@ -136,6 +151,9 @@ export function beginRun(simulation: GameSimulation): void {
   simulation.events = [];
   simulation.lastAcceptedFlipAtMs = null;
   simulation.respawnPoint = { ...simulation.spawn };
+  simulation.pursuitElapsedMs = 0;
+  simulation.pursuerX =
+    simulation.spawn.x - (simulation.pursuit?.initialDistance ?? 0);
   simulation.state.player = createPlayerState(
     simulation.spawn,
     simulation.tuning.runSpeed,
@@ -235,6 +253,30 @@ function updateRunningPhysics(simulation: GameSimulation): void {
   simulation.state.elapsedMs = Math.round(
     simulation.runTicks * simulation.fixedDeltaMs
   );
+
+  updatePursuit(simulation, deltaSeconds);
+}
+
+function updatePursuit(simulation: GameSimulation, deltaSeconds: number): void {
+  const pursuit = simulation.pursuit;
+  if (pursuit === null || !pursuit.enabled) {
+    return;
+  }
+
+  simulation.pursuitElapsedMs += simulation.fixedDeltaMs;
+  if (simulation.pursuitElapsedMs < pursuit.gracePeriodMs) {
+    return;
+  }
+
+  simulation.pursuerX = roundFloat(
+    simulation.pursuerX + pursuit.speed * deltaSeconds
+  );
+  if (
+    simulation.state.player.x - simulation.pursuerX <=
+    pursuit.catchDistance
+  ) {
+    killPlayer(simulation, "pursuer", simulation.clockMs);
+  }
 }
 
 function respawnPlayer(simulation: GameSimulation): void {
@@ -244,6 +286,9 @@ function respawnPlayer(simulation: GameSimulation): void {
     simulation.tuning.runSpeed,
     checkpointId
   );
+  simulation.pursuitElapsedMs = 0;
+  simulation.pursuerX =
+    simulation.respawnPoint.x - (simulation.pursuit?.initialDistance ?? 0);
   simulation.state.phase = "CHECKPOINT_RESPAWN";
   simulation.phaseElapsedMs = 0;
 }
@@ -418,6 +463,14 @@ export function getSimulationResult(
     events: simulation.events.map(cloneGameEvent),
     clockMs: simulation.clockMs
   };
+}
+
+export function getPursuitDistance(simulation: GameSimulation): number | null {
+  if (simulation.pursuit === null || !simulation.pursuit.enabled) {
+    return null;
+  }
+
+  return roundFloat(simulation.state.player.x - simulation.pursuerX);
 }
 
 function cloneGameEvent(event: GameEvent): GameEvent {
