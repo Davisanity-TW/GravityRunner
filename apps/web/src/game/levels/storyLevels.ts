@@ -85,16 +85,16 @@ export const signalPressureLevel = {
     { id: "pressure-floor-opening", x: 0, y: 648, width: 1200, height: 72 },
     { id: "pressure-ceiling-rise", x: 820, y: 0, width: 400, height: 72 },
     {
-      id: "pressure-ceiling-bridge",
+      id: "pressure-narrow-ceiling",
       x: 1200,
-      y: 0,
-      width: 1400,
+      y: 240,
+      width: 900,
       height: 72
     },
     {
-      id: "pressure-floor-bridge",
+      id: "pressure-narrow-floor",
       x: 1200,
-      y: 648,
+      y: 408,
       width: 900,
       height: 72
     },
@@ -189,6 +189,43 @@ export const signalPressureLevel = {
       height: 340
     }
   ],
+  boundarySegments: [
+    {
+      id: "pressure-boundary-opening",
+      x: 0,
+      width: 1200,
+      topHeight: 72,
+      bottomHeight: 72
+    },
+    {
+      id: "pressure-boundary-narrow",
+      x: 1200,
+      width: 900,
+      topHeight: 126,
+      bottomHeight: 126
+    },
+    {
+      id: "pressure-boundary-release",
+      x: 2100,
+      width: 1100,
+      topHeight: 72,
+      bottomHeight: 72
+    },
+    {
+      id: "pressure-boundary-final",
+      x: 3200,
+      width: 1100,
+      topHeight: 156,
+      bottomHeight: 156
+    },
+    {
+      id: "pressure-boundary-exit",
+      x: 4300,
+      width: 900,
+      topHeight: 72,
+      bottomHeight: 72
+    }
+  ]
 } as const satisfies LevelManifest;
 
 export const storyLevelManifests = {

@@ -15,6 +15,15 @@ describe("authored Story level manifests", () => {
   it("validates Level 3 geometry and its two checkpoints", () => {
     expect(validateLevelManifest(signalPressureLevel)).toEqual([]);
     expect(signalPressureLevel.checkpoints).toHaveLength(2);
-    expect("boundarySegments" in signalPressureLevel).toBe(false);
+    expect(
+      signalPressureLevel.boundarySegments?.some(
+        (segment) => segment.topHeight > 72
+      )
+    ).toBe(true);
+    expect(
+      signalPressureLevel.boundarySegments?.some(
+        (segment) => segment.bottomHeight > 72
+      )
+    ).toBe(true);
   });
 });
