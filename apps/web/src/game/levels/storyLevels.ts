@@ -181,6 +181,43 @@ export const signalPressureLevel = {
       width: 96,
       height: 340
     }
+  ],
+  boundarySegments: [
+    {
+      id: "pressure-boundary-opening",
+      x: 0,
+      width: 1200,
+      topHeight: 72,
+      bottomHeight: 72
+    },
+    {
+      id: "pressure-boundary-narrow",
+      x: 1200,
+      width: 900,
+      topHeight: 126,
+      bottomHeight: 126
+    },
+    {
+      id: "pressure-boundary-release",
+      x: 2100,
+      width: 1100,
+      topHeight: 72,
+      bottomHeight: 72
+    },
+    {
+      id: "pressure-boundary-final",
+      x: 3200,
+      width: 1100,
+      topHeight: 156,
+      bottomHeight: 156
+    },
+    {
+      id: "pressure-boundary-exit",
+      x: 4300,
+      width: 900,
+      topHeight: 72,
+      bottomHeight: 72
+    }
   ]
 } as const satisfies LevelManifest;
 
