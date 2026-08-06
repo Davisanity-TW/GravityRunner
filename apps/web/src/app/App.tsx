@@ -25,7 +25,14 @@ const GameCanvas = lazy(async () => {
 });
 
 type AppScreen = "menu" | "levels" | "practice" | "game";
-type RunMode = "STORY" | "PRACTICE";
+type RunMode = "STORY" | "PRACTICE" | "ENDLESS";
+const endlessBestScoreKey = "gravity-runner.endless-best-score.v1";
+
+function loadEndlessBestScore(): number {
+  if (typeof window === "undefined") return 0;
+  const value = Number(window.localStorage.getItem(endlessBestScoreKey));
+  return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
+}
 
 type SettingsPanelProps = {
   settings: GameSettings;
@@ -319,8 +326,14 @@ export function App() {
   }, [progress]);
 
   const completeLevel = useCallback(
-    (elapsedMs: number) => {
+    (elapsedMs: number, deaths: number) => {
       if (runMode === "PRACTICE") {
+        return;
+      }
+      if (runMode === "ENDLESS") {
+        const score = Math.max(0, Math.floor(elapsedMs / 100) - deaths * 250);
+        const best = Math.max(loadEndlessBestScore(), score);
+        window.localStorage.setItem(endlessBestScoreKey, String(best));
         return;
       }
       setProgress((current) =>
@@ -448,7 +461,7 @@ export function App() {
               }
             ].map((mode) => (
               <article
-                className={`mode-card ${mode.name === "Practice" ? "mode-card--available" : "mode-card--locked"}`}
+                className={`mode-card ${mode.name === "Practice" || mode.name === "Endless" ? "mode-card--available" : "mode-card--locked"}`}
                 key={mode.name}
               >
                 <div className="mode-card__topline">
@@ -457,6 +470,11 @@ export function App() {
                 </div>
                 <h2>{mode.name}</h2>
                 <p>{mode.copy}</p>
+                {mode.name === "Endless" ? (
+                  <p className="mode-card__topline">
+                    BEST SCORE · {loadEndlessBestScore()}
+                  </p>
+                ) : null}
                 {mode.name === "Practice" ? (
                   <button
                     type="button"
@@ -467,6 +485,19 @@ export function App() {
                     }}
                   >
                     Start practice
+                  </button>
+                ) : mode.name === "Endless" ? (
+                  <button
+                    type="button"
+                    className="play-button"
+                    onClick={() => {
+                      setRunMode("ENDLESS");
+                      setSelectedLevelId("signal-vault-01");
+                      setStartCheckpointId(null);
+                      setScreen("game");
+                    }}
+                  >
+                    Start endless
                   </button>
                 ) : (
                   <button type="button" className="locked-button" disabled>

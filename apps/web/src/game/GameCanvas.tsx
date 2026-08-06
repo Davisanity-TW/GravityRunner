@@ -10,9 +10,9 @@ type GameCanvasProps = {
   settings: GameSettings;
   onOpenSettings(): void;
   onExitToMenu(): void;
-  onLevelComplete(elapsedMs: number): void;
+  onLevelComplete(elapsedMs: number, deaths: number): void;
   levelId: StoryLevelId;
-  mode: "STORY" | "PRACTICE";
+  mode: "STORY" | "PRACTICE" | "ENDLESS";
   startCheckpointId?: string | null;
 };
 
@@ -80,7 +80,7 @@ export function GameCanvas({
       setRunState(state);
       if (state.phase === "LEVEL_COMPLETE" && !completionReported.current) {
         completionReported.current = true;
-        onLevelComplete(state.elapsedMs);
+        onLevelComplete(state.elapsedMs, state.deaths);
       }
     });
     bridge.selectedLevelId = levelId;
@@ -114,12 +114,24 @@ export function GameCanvas({
         </div>
         <div className="run-hud__metric">
           <span>CHECKPOINT</span>
-          <strong>{runState.checkpointId === null ? "0 / 1" : "1 / 1"}</strong>
+          <strong>
+            {mode === "ENDLESS"
+              ? `LIVES ${Math.max(0, 3 - runState.deaths)} / 3`
+              : runState.checkpointId === null
+                ? "0 / 1"
+                : "1 / 1"}
+          </strong>
         </div>
         <div className="run-hud__metric">
           <span>DEATHS</span>
           <strong>{runState.deaths}</strong>
         </div>
+        {mode === "ENDLESS" ? (
+          <div className="run-hud__metric">
+            <span>SCORE</span>
+            <strong>{Math.max(0, Math.floor(runState.elapsedMs / 100) - runState.deaths * 250)}</strong>
+          </div>
+        ) : null}
         <div className="run-hud__metric">
           <span>GRAVITY</span>
           <strong>{gravity}</strong>
@@ -208,7 +220,11 @@ export function GameCanvas({
         <div className="game-overlay" role="dialog" aria-label="Story result">
           <div className="game-overlay__panel result-panel">
             <p className="eyebrow">
-              {mode === "PRACTICE" ? "PRACTICE / SECTION COMPLETE" : "STORY / LEVEL COMPLETE"}
+              {mode === "PRACTICE"
+                ? "PRACTICE / SECTION COMPLETE"
+                : mode === "ENDLESS"
+                  ? "ENDLESS / RUN COMPLETE"
+                  : "STORY / LEVEL COMPLETE"}
             </p>
             <h2>Archive extracted.</h2>
             <div className="result-grid">
