@@ -33,7 +33,7 @@ const pressurePursuit: PursuitConfig = {
   enabled: true,
   gracePeriodMs: 1000,
   initialDistance: 260,
-  speed: 250,
+  speed: 260,
   accelerationIntervalMs: 3000,
   accelerationStep: 10,
   maxSpeed: 300,
