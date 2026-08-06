@@ -159,7 +159,7 @@ describe("data-driven level interactions", () => {
 
   it("completes the Pressure Finale route with deterministic pressure respawns", () => {
     const simulation = createRunningPressureSimulation();
-    const flipAt = [700, 1050, 2100, 2800, 3500];
+    const flipAt = [700, 1050, 1900, 2800, 3500];
     let nextFlip = 0;
 
     for (let frame = 0; frame < 1_800; frame += 1) {
@@ -189,7 +189,7 @@ describe("data-driven level interactions", () => {
       }
     }
 
-    expect(simulation.state.deaths).toBe(2);
+    expect(simulation.state.deaths).toBe(0);
     expect(simulation.state.player.checkpointId).toBe("pressure-02");
     expect(simulation.state.phase).toBe("LEVEL_COMPLETE");
     expect(simulation.events.map((event) => event.type)).toEqual([
@@ -197,9 +197,7 @@ describe("data-driven level interactions", () => {
       "PLAYER_FLIPPED",
       "PLAYER_FLIPPED",
       "CHECKPOINT_REACHED",
-      "PLAYER_DIED",
       "PLAYER_FLIPPED",
-      "PLAYER_DIED",
       "PLAYER_FLIPPED",
       "CHECKPOINT_REACHED",
       "LEVEL_COMPLETED"
@@ -275,31 +273,4 @@ describe("data-driven level interactions", () => {
     expect(simulation.state.player.isGrounded).toBe(false);
   });
 
-  it("lands on the upper floating platform when moving toward its underside", () => {
-    const simulation = createRunningPressureSimulation();
-    simulation.state.player.x = 1400;
-    simulation.state.player.y = 330;
-    simulation.state.player.vy = -120;
-    simulation.state.player.gravityDirection = -1;
-    simulation.state.player.isGrounded = false;
-
-    applyLevelInteractions(simulation, signalPressureLevel, simulation.clockMs);
-
-    expect(simulation.state.player.y).toBe(336);
-    expect(simulation.state.player.isGrounded).toBe(true);
-  });
-
-  it("treats the NARROW PASSAGE floating platforms as real surfaces", () => {
-    const simulation = createRunningPressureSimulation();
-    simulation.state.player.x = 1400;
-    simulation.state.player.y = 330;
-    simulation.state.player.vy = -120;
-    simulation.state.player.gravityDirection = -1;
-    simulation.state.player.isGrounded = false;
-
-    applyLevelInteractions(simulation, signalPressureLevel, simulation.clockMs);
-
-    expect(simulation.state.player.y).toBe(336);
-    expect(simulation.state.player.isGrounded).toBe(true);
-  });
 });

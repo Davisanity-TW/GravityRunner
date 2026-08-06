@@ -292,22 +292,6 @@ export class GameScene extends Phaser.Scene {
         floatingHeight,
         8
       );
-      if (segment.topHeight > 72 || segment.bottomHeight > 72) {
-        this.add
-          .text(
-            segment.x + segment.width / 2,
-            segment.topHeight + 18,
-            "NARROW PASSAGE",
-            {
-              color: "#79dfff",
-              fontFamily: "monospace",
-              fontSize: "10px",
-              fontStyle: "bold"
-            }
-          )
-          .setOrigin(0.5, 0)
-          .setDepth(2);
-      }
     }
 
     for (const hazard of level.hazards) {
