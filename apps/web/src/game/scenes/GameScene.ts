@@ -68,7 +68,7 @@ export class GameScene extends Phaser.Scene {
   create(): void {
     this.level =
       this.bridge.selectedMode === "ENDLESS"
-        ? createEndlessLevel(1337, 5)
+        ? createEndlessLevel(1337, 10)
         : getStoryLevelManifest(this.bridge.selectedLevelId as StoryRuntimeLevelId);
     const selectedCheckpoint = this.level.checkpoints.find(
       (checkpoint) => checkpoint.id === this.bridge.selectedStartCheckpointId
