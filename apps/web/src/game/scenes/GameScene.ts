@@ -258,26 +258,36 @@ export class GameScene extends Phaser.Scene {
 
     for (const segment of level.boundarySegments ?? []) {
       const boundary = this.add.graphics().setDepth(-1);
-      boundary.fillStyle(0x1d4960, 0.72);
-      boundary.fillRect(segment.x, 0, segment.width, segment.topHeight);
-      boundary.fillRect(
-        segment.x,
-        level.height - segment.bottomHeight,
-        segment.width,
-        segment.bottomHeight
-      );
-      boundary.lineStyle(2, 0x79dfff, 0.48);
-      boundary.lineBetween(
+      const floatingHeight = 24;
+      boundary.fillStyle(0x1d4960, 0.84);
+      boundary.fillRoundedRect(
         segment.x,
         segment.topHeight,
-        segment.x + segment.width,
-        segment.topHeight
+        segment.width,
+        floatingHeight,
+        8
       );
-      boundary.lineBetween(
+      boundary.fillRoundedRect(
         segment.x,
-        level.height - segment.bottomHeight,
-        segment.x + segment.width,
-        level.height - segment.bottomHeight
+        level.height - segment.bottomHeight - floatingHeight,
+        segment.width,
+        floatingHeight,
+        8
+      );
+      boundary.lineStyle(2, 0x79dfff, 0.7);
+      boundary.strokeRoundedRect(
+        segment.x,
+        segment.topHeight,
+        segment.width,
+        floatingHeight,
+        8
+      );
+      boundary.strokeRoundedRect(
+        segment.x,
+        level.height - segment.bottomHeight - floatingHeight,
+        segment.width,
+        floatingHeight,
+        8
       );
       if (segment.topHeight > 72 || segment.bottomHeight > 72) {
         this.add

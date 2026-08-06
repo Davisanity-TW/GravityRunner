@@ -82,16 +82,23 @@ export const signalPressureLevel = {
     { id: "pressure-02", x: 4050, y: 96, gravityDirection: -1 }
   ],
   platforms: [
+    { id: "pressure-floor-opening", x: 0, y: 648, width: 1200, height: 72 },
+    { id: "pressure-ceiling-rise", x: 820, y: 0, width: 400, height: 72 },
     {
-      id: "pressure-floor-safety-runway",
-      x: 0,
-      y: 648,
-      width: 5200,
+      id: "pressure-narrow-ceiling",
+      x: 1200,
+      y: 240,
+      width: 900,
       height: 72
     },
-    { id: "pressure-floor-opening", x: 0, y: 648, width: 1200, height: 72 },
-    { id: "pressure-ceiling-rise", x: 820, y: 0, width: 1500, height: 72 },
-    { id: "pressure-floor-crossing", x: 1200, y: 648, width: 1800, height: 72 },
+    {
+      id: "pressure-narrow-floor",
+      x: 1200,
+      y: 408,
+      width: 900,
+      height: 72
+    },
+    { id: "pressure-floor-crossing", x: 2100, y: 648, width: 900, height: 72 },
     { id: "pressure-ceiling-arc", x: 2600, y: 0, width: 1700, height: 72 },
     { id: "pressure-floor-finale", x: 3000, y: 648, width: 1450, height: 72 },
     { id: "pressure-ceiling-finish", x: 4200, y: 0, width: 1000, height: 72 }
@@ -150,7 +157,7 @@ export const signalPressureLevel = {
     {
       id: "pressure-boost-floor",
       x: 1320,
-      y: 600,
+      y: 360,
       width: 180,
       height: 48,
       durationMs: 2000,
