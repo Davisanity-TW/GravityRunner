@@ -47,7 +47,9 @@ export function createEndlessLevel(
       id: `endless-hazard-${index + 6}`,
       type: index % 2 === 0 ? "electric" : "spikes",
       x: platform.x + Math.floor(chunk.width * 0.48),
-      y: chunk.entryGravity === 1 ? 600 : 72,
+      // Place the hazard on the opposite surface so a checkpoint respawn on
+      // the entry lane always has a readable escape route.
+      y: chunk.entryGravity === 1 ? 72 : 600,
       width: 72 + index * 8,
       height: 48
     };
