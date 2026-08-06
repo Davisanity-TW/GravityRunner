@@ -21,7 +21,9 @@ export class HudScene extends Phaser.Scene {
       .text(
         28,
         24,
-        this.bridge.selectedLevelId === "signal-vault-03"
+        this.bridge.selectedMode === "ENDLESS"
+          ? "ENDLESS / BATCH 01 · 5 CHECKPOINTS"
+          : this.bridge.selectedLevelId === "signal-vault-03"
           ? "SV-03 / PRESSURE FINALE"
           : this.bridge.selectedLevelId === "signal-vault-02"
             ? "SV-02 / SWITCHBACK"

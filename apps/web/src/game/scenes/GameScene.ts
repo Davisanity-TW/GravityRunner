@@ -24,6 +24,7 @@ import {
   getStoryLevelManifest,
   type StoryRuntimeLevelId
 } from "../levels/storyLevels.js";
+import { createEndlessLevel } from "../levels/endlessLevel.js";
 import { syncPlayerBody } from "../playerAdapter.js";
 
 const playerId = "player-1";
@@ -65,9 +66,10 @@ export class GameScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.level = getStoryLevelManifest(
-      this.bridge.selectedLevelId as StoryRuntimeLevelId
-    );
+    this.level =
+      this.bridge.selectedMode === "ENDLESS"
+        ? createEndlessLevel(1337, 5)
+        : getStoryLevelManifest(this.bridge.selectedLevelId as StoryRuntimeLevelId);
     const selectedCheckpoint = this.level.checkpoints.find(
       (checkpoint) => checkpoint.id === this.bridge.selectedStartCheckpointId
     );
