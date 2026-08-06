@@ -37,7 +37,7 @@ describe("endless authored route", () => {
     }
   });
 
-  it("keeps the fifth checkpoint route survivable after respawn", () => {
+  it("keeps the ninth checkpoint route survivable after respawn", () => {
     const level = createEndlessLevel(1337, 10);
     const simulation = createGameSimulation({
       levelId: level.id,
@@ -61,7 +61,7 @@ describe("endless authored route", () => {
     enterMenu(simulation);
     beginRun(simulation);
     let nextPlatform = 1;
-    for (let frame = 0; frame < 1_800; frame += 1) {
+    for (let frame = 0; frame < 3_000; frame += 1) {
       const commands = [];
       const threshold = level.platforms[nextPlatform]?.x;
       if (
@@ -78,10 +78,11 @@ describe("endless authored route", () => {
       }
       stepSimulation(simulation, simulation.fixedDeltaMs, commands);
       applyLevelInteractions(simulation, level, simulation.clockMs);
-      if (simulation.state.player.checkpointId === "endless-5") break;
+      if (simulation.state.player.checkpointId === "endless-9") break;
     }
-    expect(simulation.state.player.checkpointId).toBe("endless-5");
+    expect(simulation.state.player.checkpointId).toBe("endless-9");
     expect(simulation.state.deaths).toBe(0);
+    expect(level.checkpoints[8]!.x).toBeLessThan(level.checkpoints[9]!.x);
   });
 
 });
