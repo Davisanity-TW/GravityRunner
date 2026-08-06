@@ -25,6 +25,7 @@ const GameCanvas = lazy(async () => {
 });
 
 type AppScreen = "menu" | "levels" | "game";
+type RunMode = "STORY" | "PRACTICE";
 
 type SettingsPanelProps = {
   settings: GameSettings;
@@ -243,6 +244,7 @@ export function App() {
   const [progress, setProgress] = useState(loadStoryProgress);
   const [selectedLevelId, setSelectedLevelId] =
     useState<StoryLevelId>("signal-vault-01");
+  const [runMode, setRunMode] = useState<RunMode>("STORY");
 
   useEffect(() => {
     saveGameSettings(settings);
@@ -257,11 +259,14 @@ export function App() {
 
   const completeLevel = useCallback(
     (elapsedMs: number) => {
+      if (runMode === "PRACTICE") {
+        return;
+      }
       setProgress((current) =>
         completeStoryLevel(current, selectedLevelId, elapsedMs)
       );
     },
-    [selectedLevelId]
+    [runMode, selectedLevelId]
   );
 
   return (
@@ -346,7 +351,10 @@ export function App() {
               <button
                 className="play-button"
                 type="button"
-                onClick={() => setScreen("game")}
+                onClick={() => {
+                  setRunMode("STORY");
+                  setScreen("game");
+                }}
               >
                 <span>Initialize run</span>
                 <span aria-hidden="true">→</span>
@@ -377,16 +385,33 @@ export function App() {
                 copy: "Two to four runners sharing one clock and camera."
               }
             ].map((mode) => (
-              <article className="mode-card mode-card--locked" key={mode.name}>
+              <article
+                className={`mode-card ${mode.name === "Practice" ? "mode-card--available" : "mode-card--locked"}`}
+                key={mode.name}
+              >
                 <div className="mode-card__topline">
                   <span>{mode.code}</span>
                   <span>PLANNED</span>
                 </div>
                 <h2>{mode.name}</h2>
                 <p>{mode.copy}</p>
-                <button type="button" className="locked-button" disabled>
-                  Coming soon
-                </button>
+                {mode.name === "Practice" ? (
+                  <button
+                    type="button"
+                    className="play-button"
+                    onClick={() => {
+                      setRunMode("PRACTICE");
+                      setSelectedLevelId("signal-vault-01");
+                      setScreen("game");
+                    }}
+                  >
+                    Start practice
+                  </button>
+                ) : (
+                  <button type="button" className="locked-button" disabled>
+                    Coming soon
+                  </button>
+                )}
               </article>
             ))}
           </div>
@@ -397,6 +422,7 @@ export function App() {
           onBack={() => setScreen("menu")}
           onSelect={(levelId) => {
             setSelectedLevelId(levelId);
+            setRunMode("STORY");
             setScreen("game");
           }}
         />
@@ -428,6 +454,7 @@ export function App() {
               onExitToMenu={() => setScreen("levels")}
               onLevelComplete={completeLevel}
               levelId={selectedLevelId}
+              mode={runMode}
             />
           </Suspense>
         </section>

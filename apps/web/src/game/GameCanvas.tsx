@@ -12,6 +12,7 @@ type GameCanvasProps = {
   onExitToMenu(): void;
   onLevelComplete(elapsedMs: number): void;
   levelId: StoryLevelId;
+  mode: "STORY" | "PRACTICE";
 };
 
 function formatElapsed(elapsedMs: number): string {
@@ -29,7 +30,8 @@ export function GameCanvas({
   onOpenSettings,
   onExitToMenu,
   onLevelComplete,
-  levelId
+  levelId,
+  mode
 }: GameCanvasProps) {
   const exposeDebugState = (
     import.meta as ImportMeta & { env: { DEV: boolean } }
@@ -80,6 +82,7 @@ export function GameCanvas({
       }
     });
     bridge.selectedLevelId = levelId;
+    bridge.selectedMode = mode;
     const runtime = phaserLifecycle.mount(container, bridge);
 
     return () => {
@@ -89,7 +92,7 @@ export function GameCanvas({
       offScene();
       runtime.dispose();
     };
-  }, [bridge, levelId, onLevelComplete]);
+  }, [bridge, levelId, mode, onLevelComplete]);
 
   const pause = () => bridge.emit("ui:pause", {});
   const resume = () => bridge.emit("ui:resume", {});
@@ -201,7 +204,9 @@ export function GameCanvas({
       {runState.phase === "LEVEL_COMPLETE" ? (
         <div className="game-overlay" role="dialog" aria-label="Story result">
           <div className="game-overlay__panel result-panel">
-            <p className="eyebrow">STORY / LEVEL COMPLETE</p>
+            <p className="eyebrow">
+              {mode === "PRACTICE" ? "PRACTICE / SECTION COMPLETE" : "STORY / LEVEL COMPLETE"}
+            </p>
             <h2>Archive extracted.</h2>
             <div className="result-grid">
               <div>
@@ -221,7 +226,7 @@ export function GameCanvas({
             </div>
             <div className="overlay-actions">
               <button className="play-button" type="button" onClick={restart}>
-                Retry level
+                {mode === "PRACTICE" ? "Restart section" : "Retry level"}
               </button>
               <button
                 className="secondary-button"
