@@ -165,6 +165,22 @@ export const signalPressureLevel = {
       durationMs: 2000,
       multiplier: 1.25
     }
+  ],
+  terrainBlocks: [
+    {
+      id: "pressure-mid-lane-block",
+      x: 2860,
+      y: 220,
+      width: 96,
+      height: 300
+    },
+    {
+      id: "pressure-exit-lane-block",
+      x: 4480,
+      y: 180,
+      width: 96,
+      height: 340
+    }
   ]
 } as const satisfies LevelManifest;
 

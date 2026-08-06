@@ -15,6 +15,7 @@ export type LevelInteractionResult = {
   died: boolean;
   completed: boolean;
   boostActivated: string | null;
+  blockedByTerrain: string | null;
 };
 
 type Rectangle = {
@@ -62,7 +63,8 @@ export function applyLevelInteractions(
     reachedCheckpoint: null,
     died: false,
     completed: false,
-    boostActivated: null
+    boostActivated: null,
+    blockedByTerrain: null
   };
 
   if (simulation.state.phase !== "RUNNING") {
@@ -101,6 +103,14 @@ export function applyLevelInteractions(
     width: playerSize,
     height: playerSize
   };
+  const terrainBlock = (level.terrainBlocks ?? []).find((block) =>
+    overlaps(playerBounds, block)
+  );
+  if (terrainBlock !== undefined) {
+    simulation.state.player.x = terrainBlock.x - half;
+    simulation.state.player.vx = 0;
+    result.blockedByTerrain = terrainBlock.id;
+  }
   const boostZones = level.boostZones ?? [];
   for (const zone of boostZones) {
     if (overlaps(playerBounds, zone)) {

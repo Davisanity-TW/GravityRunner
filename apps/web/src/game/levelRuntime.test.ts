@@ -223,4 +223,21 @@ describe("data-driven level interactions", () => {
       signalPressureLevel.runSpeed * 1.25
     );
   });
+
+  it("blocks forward movement at authored terrain walls", () => {
+    const simulation = createRunningPressureSimulation();
+    simulation.state.player.x = 2860;
+    simulation.state.player.y = 360;
+    simulation.state.player.gravityDirection = 1;
+
+    const interaction = applyLevelInteractions(
+      simulation,
+      signalPressureLevel,
+      simulation.clockMs
+    );
+
+    expect(interaction.blockedByTerrain).toBe("pressure-mid-lane-block");
+    expect(simulation.state.player.x).toBe(2836);
+    expect(simulation.state.player.vx).toBe(0);
+  });
 });

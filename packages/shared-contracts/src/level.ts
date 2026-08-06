@@ -61,6 +61,17 @@ const BoostZoneSchema = Type.Object(
   { additionalProperties: false }
 );
 
+const TerrainBlockSchema = Type.Object(
+  {
+    id: IdentifierSchema,
+    x: Type.Number(),
+    y: Type.Number(),
+    width: PositiveDimensionSchema,
+    height: PositiveDimensionSchema
+  },
+  { additionalProperties: false }
+);
+
 export const LevelManifestSchema = Type.Object(
   {
     id: IdentifierSchema,
@@ -82,7 +93,8 @@ export const LevelManifestSchema = Type.Object(
     checkpoints: Type.Array(CheckpointSchema),
     platforms: Type.Array(PlatformSchema),
     hazards: Type.Array(HazardSchema),
-    boostZones: Type.Optional(Type.Array(BoostZoneSchema))
+    boostZones: Type.Optional(Type.Array(BoostZoneSchema)),
+    terrainBlocks: Type.Optional(Type.Array(TerrainBlockSchema))
   },
   { $id: "LevelManifest", additionalProperties: false }
 );

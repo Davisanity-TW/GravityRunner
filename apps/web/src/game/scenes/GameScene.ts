@@ -325,6 +325,33 @@ export class GameScene extends Phaser.Scene {
         .setDepth(8);
     }
 
+    for (const block of level.terrainBlocks ?? []) {
+      const terrain = this.add.graphics().setDepth(9);
+      terrain.fillStyle(0x5d345e, 0.88);
+      terrain.fillRoundedRect(block.x, block.y, block.width, block.height, 10);
+      terrain.lineStyle(3, 0xff6b8a, 0.78);
+      terrain.strokeRoundedRect(
+        block.x,
+        block.y,
+        block.width,
+        block.height,
+        10
+      );
+      terrain.lineStyle(2, 0xffd166, 0.45);
+      for (let y = block.y + 24; y < block.y + block.height; y += 32) {
+        terrain.lineBetween(block.x + 14, y, block.x + block.width - 14, y);
+      }
+      this.add
+        .text(block.x + block.width / 2, block.y - 12, "BLOCK", {
+          color: "#ff9ab0",
+          fontFamily: "monospace",
+          fontSize: "10px",
+          fontStyle: "bold"
+        })
+        .setOrigin(0.5, 1)
+        .setDepth(10);
+    }
+
     for (const checkpoint of level.checkpoints) {
       this.add
         .rectangle(
