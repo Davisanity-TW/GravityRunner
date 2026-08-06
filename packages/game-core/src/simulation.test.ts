@@ -266,17 +266,19 @@ describe("commands and lifecycle events", () => {
         gracePeriodMs: 0,
         initialDistance: 500,
         speed: 200,
-        acceleration: 120,
-        maxSpeed: 500,
+        accelerationIntervalMs: 3000,
+        accelerationStep: 25,
+        maxSpeed: 300,
         catchDistance: 1
       }
     });
     enterMenu(simulation);
     beginRun(simulation);
     stepSimulation(simulation, 250);
+    expect(simulation.pursuerSpeed).toBe(200);
 
-    expect(simulation.pursuerSpeed).toBeGreaterThan(200);
-    expect(simulation.pursuerSpeed).toBeLessThanOrEqual(500);
+    stepSimulation(simulation, simulation.fixedDeltaMs * 180);
+    expect(simulation.pursuerSpeed).toBe(225);
   });
 
   it("resets the pursuer at the latest checkpoint on respawn", () => {

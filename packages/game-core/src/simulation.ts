@@ -30,6 +30,8 @@ export type PursuitConfig = {
   catchDistance: number;
   acceleration?: number;
   maxSpeed?: number;
+  accelerationIntervalMs?: number;
+  accelerationStep?: number;
 };
 
 export type SimulationResult = {
@@ -53,6 +55,7 @@ export type GameSimulation = {
   pursuerX: number;
   pursuitElapsedMs: number;
   pursuerSpeed: number;
+  pursuerAccelerationElapsedMs: number;
   speedBoostMultiplier: number;
   speedBoostUntilMs: number;
   activeBoostZoneIds: Set<string>;
@@ -119,6 +122,7 @@ export function createGameSimulation(
     pursuerX: spawn.x - (options.pursuit?.initialDistance ?? 0),
     pursuitElapsedMs: 0,
     pursuerSpeed: options.pursuit?.speed ?? 0,
+    pursuerAccelerationElapsedMs: 0,
     speedBoostMultiplier: 1,
     speedBoostUntilMs: 0,
     activeBoostZoneIds: new Set(),
@@ -163,6 +167,7 @@ export function beginRun(simulation: GameSimulation): void {
   simulation.respawnPoint = { ...simulation.spawn };
   simulation.pursuitElapsedMs = 0;
   simulation.pursuerSpeed = simulation.pursuit?.speed ?? 0;
+  simulation.pursuerAccelerationElapsedMs = 0;
   simulation.pursuerX =
     simulation.spawn.x - (simulation.pursuit?.initialDistance ?? 0);
   simulation.speedBoostMultiplier = 1;
@@ -285,10 +290,23 @@ function updatePursuit(simulation: GameSimulation, deltaSeconds: number): void {
     return;
   }
 
-  simulation.pursuerSpeed = Math.min(
-    pursuit.maxSpeed ?? Number.POSITIVE_INFINITY,
-    simulation.pursuerSpeed + (pursuit.acceleration ?? 0) * deltaSeconds
-  );
+  if (pursuit.accelerationIntervalMs && pursuit.accelerationStep) {
+    simulation.pursuerAccelerationElapsedMs += simulation.fixedDeltaMs;
+    while (
+      simulation.pursuerAccelerationElapsedMs >= pursuit.accelerationIntervalMs
+    ) {
+      simulation.pursuerAccelerationElapsedMs -= pursuit.accelerationIntervalMs;
+      simulation.pursuerSpeed = Math.min(
+        pursuit.maxSpeed ?? Number.POSITIVE_INFINITY,
+        simulation.pursuerSpeed + pursuit.accelerationStep
+      );
+    }
+  } else {
+    simulation.pursuerSpeed = Math.min(
+      pursuit.maxSpeed ?? Number.POSITIVE_INFINITY,
+      simulation.pursuerSpeed + (pursuit.acceleration ?? 0) * deltaSeconds
+    );
+  }
   simulation.pursuerX = roundFloat(
     simulation.pursuerX + simulation.pursuerSpeed * deltaSeconds
   );
@@ -312,6 +330,7 @@ function respawnPlayer(simulation: GameSimulation): void {
   simulation.activeBoostZoneIds.clear();
   simulation.pursuitElapsedMs = 0;
   simulation.pursuerSpeed = simulation.pursuit?.speed ?? 0;
+  simulation.pursuerAccelerationElapsedMs = 0;
   simulation.pursuerX =
     simulation.respawnPoint.x - (simulation.pursuit?.initialDistance ?? 0);
   simulation.state.phase = "CHECKPOINT_RESPAWN";
