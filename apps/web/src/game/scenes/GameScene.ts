@@ -37,7 +37,7 @@ const pressurePursuit: PursuitConfig = {
   speed: 260,
   accelerationIntervalMs: 3000,
   accelerationStep: 10,
-  maxSpeed: 300,
+  maxSpeed: 370,
   catchDistance: 72
 };
 
@@ -111,6 +111,9 @@ export class GameScene extends Phaser.Scene {
       tuning: {
         tickRateHz: 60,
         runSpeed: this.level.runSpeed,
+        playerAccelerationIntervalMs: 5000,
+        playerAccelerationStep: 10,
+        playerMaxSpeed: 350,
         gravityAcceleration: 1200,
         maxVerticalSpeed: 720,
         flipVelocityDamping: 0.2,

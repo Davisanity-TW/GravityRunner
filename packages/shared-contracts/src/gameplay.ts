@@ -127,6 +127,9 @@ export const GameTuningConfigSchema = Type.Object(
   {
     tickRateHz: Type.Integer({ minimum: 1, maximum: 240 }),
     runSpeed: Type.Number({ exclusiveMinimum: 0 }),
+    playerAccelerationIntervalMs: Type.Optional(Type.Integer({ minimum: 1 })),
+    playerAccelerationStep: Type.Optional(Type.Number({ exclusiveMinimum: 0 })),
+    playerMaxSpeed: Type.Optional(Type.Number({ exclusiveMinimum: 0 })),
     gravityAcceleration: Type.Number({ exclusiveMinimum: 0 }),
     maxVerticalSpeed: Type.Number({ exclusiveMinimum: 0 }),
     flipVelocityDamping: Type.Number({ minimum: 0, maximum: 1 }),

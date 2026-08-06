@@ -260,7 +260,20 @@ function updateRunningPhysics(simulation: GameSimulation): void {
   if (simulation.clockMs >= simulation.speedBoostUntilMs) {
     simulation.speedBoostMultiplier = 1;
   }
-  player.vx = simulation.tuning.runSpeed * simulation.speedBoostMultiplier;
+  const accelerationIntervalMs =
+    simulation.tuning.playerAccelerationIntervalMs;
+  const accelerationStep = simulation.tuning.playerAccelerationStep ?? 0;
+  const playerMaxSpeed =
+    simulation.tuning.playerMaxSpeed ?? simulation.tuning.runSpeed;
+  const accelerationSteps =
+    accelerationIntervalMs === undefined
+      ? 0
+      : Math.floor(simulation.state.elapsedMs / accelerationIntervalMs);
+  const playerSpeed = Math.min(
+    playerMaxSpeed,
+    simulation.tuning.runSpeed + accelerationSteps * accelerationStep
+  );
+  player.vx = playerSpeed * simulation.speedBoostMultiplier;
   player.vy = Math.max(
     -simulation.tuning.maxVerticalSpeed,
     Math.min(

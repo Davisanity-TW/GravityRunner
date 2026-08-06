@@ -62,6 +62,27 @@ describe("fixed-step state machine", () => {
     expect(simulation.state.phase).toBe("RUNNING");
   });
 
+  it("accelerates the player in five-second steps up to the configured cap", () => {
+    const simulation = createGameSimulation({
+      levelId: "signal-vault",
+      levelVersion: 1,
+      playerId: "player-1",
+      spawn: { x: 100, y: 600, gravityDirection: 1 },
+      tuning: {
+        ...tuning,
+        playerAccelerationIntervalMs: 5000,
+        playerAccelerationStep: 10,
+        playerMaxSpeed: 350
+      }
+    });
+    enterMenu(simulation);
+    beginRun(simulation);
+    stepSimulation(simulation, 5250);
+    expect(simulation.state.player.vx).toBe(250);
+    stepSimulation(simulation, 50_000);
+    expect(simulation.state.player.vx).toBe(350);
+  });
+
   it("produces identical state and events for identical replays", () => {
     const replay = () => {
       const simulation = createRunningSimulation();
