@@ -159,7 +159,7 @@ describe("data-driven level interactions", () => {
 
   it("completes the Pressure Finale route with deterministic pressure respawns", () => {
     const simulation = createRunningPressureSimulation();
-    const flipAt = [700, 1250, 1900, 2800, 3500];
+    const flipAt = [700, 1050, 2100, 2800, 3500];
     let nextFlip = 0;
 
     for (let frame = 0; frame < 1_800; frame += 1) {
@@ -209,7 +209,7 @@ describe("data-driven level interactions", () => {
   it("activates authored boost zones when the player crosses them", () => {
     const simulation = createRunningPressureSimulation();
     simulation.state.player.x = 1400;
-    simulation.state.player.y = 624;
+    simulation.state.player.y = 384;
 
     const interaction = applyLevelInteractions(
       simulation,

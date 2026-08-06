@@ -37,6 +37,7 @@ function overlaps(left: Rectangle, right: Rectangle): boolean {
 function supportsPlayer(
   platform: Rectangle,
   playerX: number,
+  playerY: number,
   direction: 1 | -1
 ): boolean {
   const horizontalInset = 8;
@@ -47,9 +48,12 @@ function supportsPlayer(
     return false;
   }
 
+  const half = 24;
+  const surfaceY =
+    direction === 1 ? platform.y - half : platform.y + platform.height + half;
   return direction === 1
-    ? platform.y >= 360
-    : platform.y + platform.height <= 360;
+    ? surfaceY >= playerY - half
+    : surfaceY <= playerY + half;
 }
 
 export function applyLevelInteractions(
@@ -73,9 +77,23 @@ export function applyLevelInteractions(
 
   const player = simulation.state.player;
   const half = playerSize / 2;
-  const support = level.platforms.find((platform) =>
-    supportsPlayer(platform, player.x, player.gravityDirection)
-  );
+  const support = level.platforms
+    .filter((platform) =>
+      supportsPlayer(platform, player.x, player.y, player.gravityDirection)
+    )
+    .sort((left, right) => {
+      const leftSurface =
+        player.gravityDirection === 1
+          ? left.y - half
+          : left.y + left.height + half;
+      const rightSurface =
+        player.gravityDirection === 1
+          ? right.y - half
+          : right.y + right.height + half;
+      return player.gravityDirection === 1
+        ? leftSurface - rightSurface
+        : rightSurface - leftSurface;
+    })[0];
 
   if (support !== undefined) {
     const surfaceY =
