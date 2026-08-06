@@ -259,46 +259,6 @@ export class GameScene extends Phaser.Scene {
         .setStrokeStyle(2, 0x2b6680, 0.65);
     }
 
-    for (const segment of level.boundarySegments ?? []) {
-      // Keep boundary segments available to collision/runtime systems, but do
-      // not render the special narrow-passage slabs in the scene.
-      if (segment.topHeight > 72 || segment.bottomHeight > 72) {
-        continue;
-      }
-      const boundary = this.add.graphics().setDepth(-1);
-      const floatingHeight = 24;
-      boundary.fillStyle(0x1d4960, 0.84);
-      boundary.fillRoundedRect(
-        segment.x,
-        segment.topHeight,
-        segment.width,
-        floatingHeight,
-        8
-      );
-      boundary.fillRoundedRect(
-        segment.x,
-        level.height - segment.bottomHeight - floatingHeight,
-        segment.width,
-        floatingHeight,
-        8
-      );
-      boundary.lineStyle(2, 0x79dfff, 0.7);
-      boundary.strokeRoundedRect(
-        segment.x,
-        segment.topHeight,
-        segment.width,
-        floatingHeight,
-        8
-      );
-      boundary.strokeRoundedRect(
-        segment.x,
-        level.height - segment.bottomHeight - floatingHeight,
-        segment.width,
-        floatingHeight,
-        8
-      );
-    }
-
     for (const hazard of level.hazards) {
       const graphics = this.add.graphics().setDepth(8);
       const color = hazard.type === "electric" ? 0x79dfff : 0xffc857;
