@@ -25,6 +25,34 @@ type Rectangle = {
   height: number;
 };
 
+function getLevelSurfaces(level: LevelManifest): Rectangle[] {
+  const boundarySurfaces = (level.boundarySegments ?? []).flatMap((segment) => [
+    {
+      id: `${segment.id}-top`,
+      x: segment.x,
+      y: segment.topHeight,
+      width: segment.width,
+      height: 24
+    },
+    {
+      id: `${segment.id}-bottom`,
+      x: segment.x,
+      y: level.height - segment.bottomHeight - 24,
+      width: segment.width,
+      height: 24
+    }
+  ]);
+  const supplementalBoundaries = boundarySurfaces.filter(
+    (surface) =>
+      !level.platforms.some(
+        (platform) =>
+          surface.x < platform.x + platform.width &&
+          surface.x + surface.width > platform.x
+      )
+  );
+  return [...level.platforms, ...supplementalBoundaries];
+}
+
 function overlaps(left: Rectangle, right: Rectangle): boolean {
   return (
     left.x < right.x + right.width &&
@@ -77,7 +105,7 @@ export function applyLevelInteractions(
 
   const player = simulation.state.player;
   const half = playerSize / 2;
-  const support = level.platforms
+  const support = getLevelSurfaces(level)
     .filter((platform) =>
       supportsPlayer(platform, player.x, player.y, player.gravityDirection)
     )
