@@ -240,4 +240,32 @@ describe("data-driven level interactions", () => {
     expect(simulation.state.player.x).toBe(2836);
     expect(simulation.state.player.vx).toBe(0);
   });
+
+  it("does not snap a ceiling runner to a platform while moving away", () => {
+    const simulation = createRunningPressureSimulation();
+    simulation.state.player.x = 1400;
+    simulation.state.player.y = 96;
+    simulation.state.player.vy = 180;
+    simulation.state.player.gravityDirection = -1;
+    simulation.state.player.isGrounded = false;
+
+    applyLevelInteractions(simulation, signalPressureLevel, simulation.clockMs);
+
+    expect(simulation.state.player.y).toBe(96);
+    expect(simulation.state.player.isGrounded).toBe(false);
+  });
+
+  it("lands on the upper floating platform when moving toward its underside", () => {
+    const simulation = createRunningPressureSimulation();
+    simulation.state.player.x = 1400;
+    simulation.state.player.y = 330;
+    simulation.state.player.vy = -120;
+    simulation.state.player.gravityDirection = -1;
+    simulation.state.player.isGrounded = false;
+
+    applyLevelInteractions(simulation, signalPressureLevel, simulation.clockMs);
+
+    expect(simulation.state.player.y).toBe(336);
+    expect(simulation.state.player.isGrounded).toBe(true);
+  });
 });

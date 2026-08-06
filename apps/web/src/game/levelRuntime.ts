@@ -84,8 +84,8 @@ export function applyLevelInteractions(
         : support.y + support.height + half;
     const crossedSurface =
       player.gravityDirection === 1
-        ? player.y >= surfaceY
-        : player.y <= surfaceY;
+        ? player.y >= surfaceY && player.vy >= 0
+        : player.y <= surfaceY && player.vy <= 0;
 
     if (crossedSurface) {
       setSurfaceContact(simulation, surfaceY, true);
