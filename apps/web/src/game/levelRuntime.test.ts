@@ -205,4 +205,22 @@ describe("data-driven level interactions", () => {
       "LEVEL_COMPLETED"
     ]);
   });
+
+  it("activates authored boost zones when the player crosses them", () => {
+    const simulation = createRunningPressureSimulation();
+    simulation.state.player.x = 1400;
+    simulation.state.player.y = 624;
+
+    const interaction = applyLevelInteractions(
+      simulation,
+      signalPressureLevel,
+      simulation.clockMs
+    );
+
+    expect(interaction.boostActivated).toBe("pressure-boost-floor");
+    stepSimulation(simulation, simulation.fixedDeltaMs);
+    expect(simulation.state.player.vx).toBe(
+      signalPressureLevel.runSpeed * 1.25
+    );
+  });
 });

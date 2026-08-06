@@ -48,6 +48,19 @@ const HazardSchema = Type.Object(
   { additionalProperties: false }
 );
 
+const BoostZoneSchema = Type.Object(
+  {
+    id: IdentifierSchema,
+    x: Type.Number(),
+    y: Type.Number(),
+    width: PositiveDimensionSchema,
+    height: PositiveDimensionSchema,
+    durationMs: Type.Integer({ minimum: 1 }),
+    multiplier: Type.Number({ exclusiveMinimum: 1 })
+  },
+  { additionalProperties: false }
+);
+
 export const LevelManifestSchema = Type.Object(
   {
     id: IdentifierSchema,
@@ -68,7 +81,8 @@ export const LevelManifestSchema = Type.Object(
     finish: RectangleSchema,
     checkpoints: Type.Array(CheckpointSchema),
     platforms: Type.Array(PlatformSchema),
-    hazards: Type.Array(HazardSchema)
+    hazards: Type.Array(HazardSchema),
+    boostZones: Type.Optional(Type.Array(BoostZoneSchema))
   },
   { $id: "LevelManifest", additionalProperties: false }
 );

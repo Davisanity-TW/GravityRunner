@@ -1,7 +1,9 @@
 import {
+  activateSpeedBoost,
   completeLevel,
   killPlayer,
   reachCheckpoint,
+  releaseSpeedBoostZone,
   setSurfaceContact,
   type GameSimulation
 } from "@gravity-runner/game-core";
@@ -12,6 +14,7 @@ export type LevelInteractionResult = {
   reachedCheckpoint: string | null;
   died: boolean;
   completed: boolean;
+  boostActivated: string | null;
 };
 
 type Rectangle = {
@@ -58,7 +61,8 @@ export function applyLevelInteractions(
     contactedSurface: false,
     reachedCheckpoint: null,
     died: false,
-    completed: false
+    completed: false,
+    boostActivated: null
   };
 
   if (simulation.state.phase !== "RUNNING") {
@@ -97,6 +101,23 @@ export function applyLevelInteractions(
     width: playerSize,
     height: playerSize
   };
+  const boostZones = level.boostZones ?? [];
+  for (const zone of boostZones) {
+    if (overlaps(playerBounds, zone)) {
+      if (
+        activateSpeedBoost(
+          simulation,
+          zone.id,
+          zone.multiplier,
+          zone.durationMs
+        )
+      ) {
+        result.boostActivated = zone.id;
+      }
+    } else {
+      releaseSpeedBoostZone(simulation, zone.id);
+    }
+  }
   const hazard = level.hazards.find((candidate) =>
     overlaps(playerBounds, candidate)
   );

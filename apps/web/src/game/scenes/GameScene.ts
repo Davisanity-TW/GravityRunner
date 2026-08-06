@@ -302,6 +302,29 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
+    for (const zone of level.boostZones ?? []) {
+      const boost = this.add.graphics().setDepth(7);
+      boost.fillStyle(0xffd166, 0.24);
+      boost.fillRoundedRect(zone.x, zone.y, zone.width, zone.height, 10);
+      boost.lineStyle(2, 0xffd166, 0.9);
+      boost.strokeRoundedRect(zone.x, zone.y, zone.width, zone.height, 10);
+      boost.lineBetween(
+        zone.x + 24,
+        zone.y + zone.height / 2,
+        zone.x + zone.width - 24,
+        zone.y + zone.height / 2
+      );
+      this.add
+        .text(zone.x + zone.width / 2, zone.y + zone.height / 2, "BOOST", {
+          color: "#ffe6a3",
+          fontFamily: "monospace",
+          fontSize: "11px",
+          fontStyle: "bold"
+        })
+        .setOrigin(0.5)
+        .setDepth(8);
+    }
+
     for (const checkpoint of level.checkpoints) {
       this.add
         .rectangle(

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   beginRun,
+  activateSpeedBoost,
   completeLevel,
   createGameSimulation,
   enterMenu,
@@ -240,6 +241,17 @@ describe("commands and lifecycle events", () => {
     expect(getSimulationResult(simulation)).toEqual(
       getSimulationResult(createPursuitReplay())
     );
+  });
+
+  it("stacks speed boosts and refreshes their expiry from the latest pad", () => {
+    const simulation = createRunningSimulation();
+    expect(activateSpeedBoost(simulation, "boost-a", 1.25, 2000)).toBe(true);
+    expect(activateSpeedBoost(simulation, "boost-a", 1.25, 2000)).toBe(false);
+    expect(activateSpeedBoost(simulation, "boost-b", 1.25, 2000)).toBe(true);
+
+    stepSimulation(simulation, simulation.fixedDeltaMs);
+    expect(simulation.state.player.vx).toBe(360);
+    expect(simulation.speedBoostUntilMs).toBeGreaterThan(simulation.clockMs);
   });
 
   it("resets the pursuer at the latest checkpoint on respawn", () => {

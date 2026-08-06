@@ -145,6 +145,26 @@ export const signalPressureLevel = {
       width: 104,
       height: 48
     }
+  ],
+  boostZones: [
+    {
+      id: "pressure-boost-floor",
+      x: 1320,
+      y: 600,
+      width: 180,
+      height: 48,
+      durationMs: 2000,
+      multiplier: 1.25
+    },
+    {
+      id: "pressure-boost-ceiling",
+      x: 3920,
+      y: 72,
+      width: 180,
+      height: 48,
+      durationMs: 2000,
+      multiplier: 1.25
+    }
   ]
 } as const satisfies LevelManifest;
 

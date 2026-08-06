@@ -50,6 +50,9 @@ export type GameSimulation = {
   readonly pursuit: PursuitConfig | null;
   pursuerX: number;
   pursuitElapsedMs: number;
+  speedBoostMultiplier: number;
+  speedBoostUntilMs: number;
+  activeBoostZoneIds: Set<string>;
   clockMs: number;
   accumulatorMs: number;
   phaseElapsedMs: number;
@@ -112,6 +115,9 @@ export function createGameSimulation(
     pursuit: options.pursuit ? { ...options.pursuit } : null,
     pursuerX: spawn.x - (options.pursuit?.initialDistance ?? 0),
     pursuitElapsedMs: 0,
+    speedBoostMultiplier: 1,
+    speedBoostUntilMs: 0,
+    activeBoostZoneIds: new Set(),
     clockMs: 0,
     accumulatorMs: 0,
     phaseElapsedMs: 0,
@@ -154,6 +160,9 @@ export function beginRun(simulation: GameSimulation): void {
   simulation.pursuitElapsedMs = 0;
   simulation.pursuerX =
     simulation.spawn.x - (simulation.pursuit?.initialDistance ?? 0);
+  simulation.speedBoostMultiplier = 1;
+  simulation.speedBoostUntilMs = 0;
+  simulation.activeBoostZoneIds.clear();
   simulation.state.player = createPlayerState(
     simulation.spawn,
     simulation.tuning.runSpeed,
@@ -238,7 +247,10 @@ function updateRunningPhysics(simulation: GameSimulation): void {
   const acceleration =
     simulation.tuning.gravityAcceleration * player.gravityDirection;
 
-  player.vx = simulation.tuning.runSpeed;
+  if (simulation.clockMs >= simulation.speedBoostUntilMs) {
+    simulation.speedBoostMultiplier = 1;
+  }
+  player.vx = simulation.tuning.runSpeed * simulation.speedBoostMultiplier;
   player.vy = Math.max(
     -simulation.tuning.maxVerticalSpeed,
     Math.min(
@@ -286,6 +298,9 @@ function respawnPlayer(simulation: GameSimulation): void {
     simulation.tuning.runSpeed,
     checkpointId
   );
+  simulation.speedBoostMultiplier = 1;
+  simulation.speedBoostUntilMs = 0;
+  simulation.activeBoostZoneIds.clear();
   simulation.pursuitElapsedMs = 0;
   simulation.pursuerX =
     simulation.respawnPoint.x - (simulation.pursuit?.initialDistance ?? 0);
@@ -471,6 +486,42 @@ export function getPursuitDistance(simulation: GameSimulation): number | null {
   }
 
   return roundFloat(simulation.state.player.x - simulation.pursuerX);
+}
+
+export function activateSpeedBoost(
+  simulation: GameSimulation,
+  zoneId: string,
+  multiplier: number,
+  durationMs: number
+): boolean {
+  if (
+    simulation.state.phase !== "RUNNING" ||
+    simulation.activeBoostZoneIds.has(zoneId) ||
+    !Number.isFinite(multiplier) ||
+    multiplier <= 1 ||
+    !Number.isInteger(durationMs) ||
+    durationMs <= 0
+  ) {
+    return false;
+  }
+
+  simulation.activeBoostZoneIds.add(zoneId);
+  simulation.speedBoostMultiplier = Math.min(
+    2.5,
+    simulation.speedBoostMultiplier + (multiplier - 1)
+  );
+  simulation.speedBoostUntilMs = Math.max(
+    simulation.speedBoostUntilMs,
+    simulation.clockMs + durationMs
+  );
+  return true;
+}
+
+export function releaseSpeedBoostZone(
+  simulation: GameSimulation,
+  zoneId: string
+): void {
+  simulation.activeBoostZoneIds.delete(zoneId);
 }
 
 function cloneGameEvent(event: GameEvent): GameEvent {
