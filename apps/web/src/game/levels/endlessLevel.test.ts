@@ -12,5 +12,17 @@ describe("endless authored route", () => {
     expect(first.hazards).toHaveLength(5);
     expect(first.boostZones).toHaveLength(5);
     expect(first.terrainBlocks).toHaveLength(5);
+    for (const checkpoint of first.checkpoints) {
+      const supportingPlatform = first.platforms.find(
+        (platform) =>
+          checkpoint.x >= platform.x &&
+          checkpoint.x <= platform.x + platform.width
+      );
+      expect(supportingPlatform).toBeDefined();
+      expect(checkpoint.x - supportingPlatform!.x).toBeGreaterThanOrEqual(180);
+      expect(
+        supportingPlatform!.x + supportingPlatform!.width - checkpoint.x
+      ).toBeGreaterThanOrEqual(180);
+    }
   });
 });

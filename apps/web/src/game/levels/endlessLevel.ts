@@ -29,12 +29,18 @@ export function createEndlessLevel(
     width: chunk.width,
     height: 72
   }));
-  const checkpoints = chunks.map((chunk, index) => ({
-    id: `endless-${index + 1}`,
-    x: platforms[index]!.x + chunk.width - 96,
-    y: chunk.exitGravity === 1 ? 624 : 96,
-    gravityDirection: chunk.exitGravity
-  }));
+  const checkpointBuffer = 180;
+  const checkpoints = chunks.map((chunk, index) => {
+    const landingPlatform = platforms[index + 1] ?? platforms[index]!;
+    const landingGravity = chunks[index + 1]?.entryGravity ?? chunk.exitGravity;
+    const maxSafeX = landingPlatform.x + landingPlatform.width - checkpointBuffer;
+    return {
+      id: `endless-${index + 1}`,
+      x: Math.min(landingPlatform.x + checkpointBuffer, maxSafeX),
+      y: landingGravity === 1 ? 624 : 96,
+      gravityDirection: landingGravity
+    };
+  });
   const hazards = chunks.slice(5).map((chunk, index) => {
     const platform = platforms[index + 5]!;
     return {
