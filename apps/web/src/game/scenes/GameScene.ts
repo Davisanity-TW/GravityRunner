@@ -68,6 +68,10 @@ export class GameScene extends Phaser.Scene {
     this.level = getStoryLevelManifest(
       this.bridge.selectedLevelId as StoryRuntimeLevelId
     );
+    const selectedCheckpoint = this.level.checkpoints.find(
+      (checkpoint) => checkpoint.id === this.bridge.selectedStartCheckpointId
+    );
+    const startPoint = selectedCheckpoint ?? this.level.spawn;
     this.bridge.emit("scene:changed", { scene: "GAME" });
     this.cameras.main.setBackgroundColor(0x06101e);
     this.cameras.main.setBounds(0, 0, this.level.width, this.level.height);
@@ -75,8 +79,8 @@ export class GameScene extends Phaser.Scene {
     this.renderLevel(this.level);
 
     this.runner = this.physics.add.image(
-      this.level.spawn.x,
-      this.level.spawn.y,
+      startPoint.x,
+      startPoint.y,
       "runner-run-a"
     );
     this.runner.setGravity(0, 0);
@@ -101,7 +105,7 @@ export class GameScene extends Phaser.Scene {
       levelId: this.level.id,
       levelVersion: this.level.version,
       playerId,
-      spawn: this.level.spawn,
+      spawn: startPoint,
       tuning: {
         tickRateHz: 60,
         runSpeed: this.level.runSpeed,

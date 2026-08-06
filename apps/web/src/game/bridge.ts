@@ -58,6 +58,7 @@ export class GameEventBridge {
   private readonly listeners = new Map<EventName, Set<StoredListener>>();
   selectedLevelId = "signal-vault-01";
   selectedMode: "STORY" | "PRACTICE" = "STORY";
+  selectedStartCheckpointId: string | null = null;
 
   on<K extends EventName>(event: K, listener: EventListener<K>): () => void {
     const listeners = this.listeners.get(event) ?? new Set<StoredListener>();

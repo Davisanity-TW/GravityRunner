@@ -24,7 +24,7 @@ const GameCanvas = lazy(async () => {
   return { default: module.GameCanvas };
 });
 
-type AppScreen = "menu" | "levels" | "game";
+type AppScreen = "menu" | "levels" | "practice" | "game";
 type RunMode = "STORY" | "PRACTICE";
 
 type SettingsPanelProps = {
@@ -237,6 +237,64 @@ function StoryLevelSelect({
   );
 }
 
+function PracticeSelect({
+  progress,
+  onStart,
+  onBack
+}: {
+  progress: StoryProgress;
+  onStart(levelId: StoryLevelId, checkpointId: string | null): void;
+  onBack(): void;
+}) {
+  const level = storyLevels[0]!;
+  const unlocked = getStoryLevelStatus(progress, level.id) !== "locked";
+  return (
+    <section className="story-level-select" aria-labelledby="practice-title">
+      <div className="level-select-heading">
+        <div>
+          <p className="eyebrow">PRACTICE / SECTION SELECT</p>
+          <h1 id="practice-title">Rehearse a relay.</h1>
+          <p className="lede">
+            Start from the opening or jump directly to the unlocked checkpoint.
+            Practice runs never change Story records.
+          </p>
+        </div>
+        <button className="text-button" type="button" onClick={onBack}>
+          ← Return to mode select
+        </button>
+      </div>
+      <div className="level-grid" role="region" aria-label="Practice sections">
+        <article className="level-card level-card--available">
+          <div className="mode-card__topline">
+            <span>{level.code}</span>
+            <span>AVAILABLE</span>
+          </div>
+          <h2>{level.title}</h2>
+          <p>{level.description}</p>
+          <div className="overlay-actions">
+            <button
+              className="play-button"
+              type="button"
+              disabled={!unlocked}
+              onClick={() => onStart(level.id, null)}
+            >
+              Start from opening
+            </button>
+            <button
+              className="secondary-button"
+              type="button"
+              disabled={!unlocked}
+              onClick={() => onStart(level.id, "relay-01")}
+            >
+              Start at relay checkpoint
+            </button>
+          </div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
 export function App() {
   const [screen, setScreen] = useState<AppScreen>("menu");
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -245,6 +303,9 @@ export function App() {
   const [selectedLevelId, setSelectedLevelId] =
     useState<StoryLevelId>("signal-vault-01");
   const [runMode, setRunMode] = useState<RunMode>("STORY");
+  const [startCheckpointId, setStartCheckpointId] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     saveGameSettings(settings);
@@ -353,6 +414,7 @@ export function App() {
                 type="button"
                 onClick={() => {
                   setRunMode("STORY");
+                  setStartCheckpointId(null);
                   setScreen("game");
                 }}
               >
@@ -401,8 +463,7 @@ export function App() {
                     className="play-button"
                     onClick={() => {
                       setRunMode("PRACTICE");
-                      setSelectedLevelId("signal-vault-01");
-                      setScreen("game");
+                      setScreen("practice");
                     }}
                   >
                     Start practice
@@ -423,6 +484,18 @@ export function App() {
           onSelect={(levelId) => {
             setSelectedLevelId(levelId);
             setRunMode("STORY");
+            setStartCheckpointId(null);
+            setScreen("game");
+          }}
+        />
+      ) : screen === "practice" ? (
+        <PracticeSelect
+          progress={progress}
+          onBack={() => setScreen("menu")}
+          onStart={(levelId, checkpointId) => {
+            setSelectedLevelId(levelId);
+            setRunMode("PRACTICE");
+            setStartCheckpointId(checkpointId);
             setScreen("game");
           }}
         />
@@ -455,6 +528,7 @@ export function App() {
               onLevelComplete={completeLevel}
               levelId={selectedLevelId}
               mode={runMode}
+              startCheckpointId={startCheckpointId}
             />
           </Suspense>
         </section>

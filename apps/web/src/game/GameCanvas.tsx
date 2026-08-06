@@ -13,6 +13,7 @@ type GameCanvasProps = {
   onLevelComplete(elapsedMs: number): void;
   levelId: StoryLevelId;
   mode: "STORY" | "PRACTICE";
+  startCheckpointId?: string | null;
 };
 
 function formatElapsed(elapsedMs: number): string {
@@ -31,7 +32,8 @@ export function GameCanvas({
   onExitToMenu,
   onLevelComplete,
   levelId,
-  mode
+  mode,
+  startCheckpointId = null
 }: GameCanvasProps) {
   const exposeDebugState = (
     import.meta as ImportMeta & { env: { DEV: boolean } }
@@ -83,6 +85,7 @@ export function GameCanvas({
     });
     bridge.selectedLevelId = levelId;
     bridge.selectedMode = mode;
+    bridge.selectedStartCheckpointId = startCheckpointId;
     const runtime = phaserLifecycle.mount(container, bridge);
 
     return () => {
@@ -92,7 +95,7 @@ export function GameCanvas({
       offScene();
       runtime.dispose();
     };
-  }, [bridge, levelId, mode, onLevelComplete]);
+  }, [bridge, levelId, mode, onLevelComplete, startCheckpointId]);
 
   const pause = () => bridge.emit("ui:pause", {});
   const resume = () => bridge.emit("ui:resume", {});
