@@ -35,7 +35,7 @@ const pressurePursuit: PursuitConfig = {
   initialDistance: 260,
   speed: 290,
   accelerationIntervalMs: 3000,
-  accelerationStep: 25,
+  accelerationStep: 15,
   maxSpeed: 390,
   catchDistance: 72
 };
