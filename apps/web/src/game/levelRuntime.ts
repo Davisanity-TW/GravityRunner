@@ -107,8 +107,25 @@ export function applyLevelInteractions(
     overlaps(playerBounds, block)
   );
   if (terrainBlock !== undefined) {
-    simulation.state.player.x = terrainBlock.x - half;
-    simulation.state.player.vx = 0;
+    const topSurfaceY = terrainBlock.y - half;
+    const bottomSurfaceY = terrainBlock.y + terrainBlock.height + half;
+    const landingOnTop =
+      simulation.state.player.gravityDirection === 1 &&
+      simulation.state.player.vy >= 0 &&
+      simulation.state.player.y <= terrainBlock.y;
+    const landingOnBottom =
+      simulation.state.player.gravityDirection === -1 &&
+      simulation.state.player.vy <= 0 &&
+      simulation.state.player.y >= terrainBlock.y + terrainBlock.height;
+
+    if (landingOnTop) {
+      setSurfaceContact(simulation, topSurfaceY, true);
+    } else if (landingOnBottom) {
+      setSurfaceContact(simulation, bottomSurfaceY, true);
+    } else {
+      simulation.state.player.x = terrainBlock.x - half;
+      simulation.state.player.vx = 0;
+    }
     result.blockedByTerrain = terrainBlock.id;
   }
   const boostZones = level.boostZones ?? [];

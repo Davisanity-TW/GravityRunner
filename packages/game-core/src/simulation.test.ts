@@ -254,6 +254,31 @@ describe("commands and lifecycle events", () => {
     expect(simulation.speedBoostUntilMs).toBeGreaterThan(simulation.clockMs);
   });
 
+  it("accelerates the pursuer independently of player movement", () => {
+    const simulation = createGameSimulation({
+      levelId: "signal-vault-03",
+      levelVersion: 1,
+      playerId: "player-1",
+      spawn: { x: 100, y: 600, gravityDirection: 1 },
+      tuning,
+      pursuit: {
+        enabled: true,
+        gracePeriodMs: 0,
+        initialDistance: 500,
+        speed: 200,
+        acceleration: 120,
+        maxSpeed: 500,
+        catchDistance: 1
+      }
+    });
+    enterMenu(simulation);
+    beginRun(simulation);
+    stepSimulation(simulation, 250);
+
+    expect(simulation.pursuerSpeed).toBeGreaterThan(200);
+    expect(simulation.pursuerSpeed).toBeLessThanOrEqual(500);
+  });
+
   it("resets the pursuer at the latest checkpoint on respawn", () => {
     const simulation = createRunningPursuitSimulation();
     reachCheckpoint(simulation, {

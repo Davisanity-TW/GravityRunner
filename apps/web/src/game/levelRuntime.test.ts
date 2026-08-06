@@ -241,6 +241,26 @@ describe("data-driven level interactions", () => {
     expect(simulation.state.player.vx).toBe(0);
   });
 
+  it("allows landing on both sides of a terrain block", () => {
+    const top = createRunningPressureSimulation();
+    top.state.player.x = 2860;
+    top.state.player.y = 200;
+    top.state.player.vy = 120;
+    top.state.player.gravityDirection = 1;
+    applyLevelInteractions(top, signalPressureLevel, top.clockMs);
+    expect(top.state.player.y).toBe(196);
+    expect(top.state.player.isGrounded).toBe(true);
+
+    const bottom = createRunningPressureSimulation();
+    bottom.state.player.x = 2860;
+    bottom.state.player.y = 540;
+    bottom.state.player.vy = -120;
+    bottom.state.player.gravityDirection = -1;
+    applyLevelInteractions(bottom, signalPressureLevel, bottom.clockMs);
+    expect(bottom.state.player.y).toBe(544);
+    expect(bottom.state.player.isGrounded).toBe(true);
+  });
+
   it("does not snap a ceiling runner to a platform while moving away", () => {
     const simulation = createRunningPressureSimulation();
     simulation.state.player.x = 1400;

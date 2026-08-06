@@ -28,6 +28,8 @@ export type PursuitConfig = {
   initialDistance: number;
   speed: number;
   catchDistance: number;
+  acceleration?: number;
+  maxSpeed?: number;
 };
 
 export type SimulationResult = {
@@ -50,6 +52,7 @@ export type GameSimulation = {
   readonly pursuit: PursuitConfig | null;
   pursuerX: number;
   pursuitElapsedMs: number;
+  pursuerSpeed: number;
   speedBoostMultiplier: number;
   speedBoostUntilMs: number;
   activeBoostZoneIds: Set<string>;
@@ -115,6 +118,7 @@ export function createGameSimulation(
     pursuit: options.pursuit ? { ...options.pursuit } : null,
     pursuerX: spawn.x - (options.pursuit?.initialDistance ?? 0),
     pursuitElapsedMs: 0,
+    pursuerSpeed: options.pursuit?.speed ?? 0,
     speedBoostMultiplier: 1,
     speedBoostUntilMs: 0,
     activeBoostZoneIds: new Set(),
@@ -158,6 +162,7 @@ export function beginRun(simulation: GameSimulation): void {
   simulation.lastAcceptedFlipAtMs = null;
   simulation.respawnPoint = { ...simulation.spawn };
   simulation.pursuitElapsedMs = 0;
+  simulation.pursuerSpeed = simulation.pursuit?.speed ?? 0;
   simulation.pursuerX =
     simulation.spawn.x - (simulation.pursuit?.initialDistance ?? 0);
   simulation.speedBoostMultiplier = 1;
@@ -280,8 +285,12 @@ function updatePursuit(simulation: GameSimulation, deltaSeconds: number): void {
     return;
   }
 
+  simulation.pursuerSpeed = Math.min(
+    pursuit.maxSpeed ?? Number.POSITIVE_INFINITY,
+    simulation.pursuerSpeed + (pursuit.acceleration ?? 0) * deltaSeconds
+  );
   simulation.pursuerX = roundFloat(
-    simulation.pursuerX + pursuit.speed * deltaSeconds
+    simulation.pursuerX + simulation.pursuerSpeed * deltaSeconds
   );
   if (
     simulation.state.player.x - simulation.pursuerX <=
@@ -302,6 +311,7 @@ function respawnPlayer(simulation: GameSimulation): void {
   simulation.speedBoostUntilMs = 0;
   simulation.activeBoostZoneIds.clear();
   simulation.pursuitElapsedMs = 0;
+  simulation.pursuerSpeed = simulation.pursuit?.speed ?? 0;
   simulation.pursuerX =
     simulation.respawnPoint.x - (simulation.pursuit?.initialDistance ?? 0);
   simulation.state.phase = "CHECKPOINT_RESPAWN";
