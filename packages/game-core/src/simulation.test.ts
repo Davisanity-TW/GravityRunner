@@ -296,6 +296,24 @@ describe("commands and lifecycle events", () => {
     expect(simulation.pursuerX).toBe(520);
     expect(simulation.state.player.x).toBe(640);
   });
+
+  it("keeps the pursuer speed after a checkpoint respawn", () => {
+    const simulation = createRunningPursuitSimulation();
+    simulation.pursuerSpeed = 285;
+    simulation.pursuerAccelerationElapsedMs = 1200;
+    reachCheckpoint(simulation, {
+      id: "pressure-01",
+      x: 640,
+      y: 600,
+      gravityDirection: 1,
+      atMs: 300
+    });
+    killPlayer(simulation, "hazard", 400);
+    stepSimulation(simulation, simulation.fixedDeltaMs * 18);
+
+    expect(simulation.pursuerSpeed).toBe(285);
+    expect(simulation.pursuerAccelerationElapsedMs).toBe(1200);
+  });
 });
 
 function createRunningPursuitSimulation(): GameSimulation {

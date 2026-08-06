@@ -329,8 +329,6 @@ function respawnPlayer(simulation: GameSimulation): void {
   simulation.speedBoostUntilMs = 0;
   simulation.activeBoostZoneIds.clear();
   simulation.pursuitElapsedMs = 0;
-  simulation.pursuerSpeed = simulation.pursuit?.speed ?? 0;
-  simulation.pursuerAccelerationElapsedMs = 0;
   simulation.pursuerX =
     simulation.respawnPoint.x - (simulation.pursuit?.initialDistance ?? 0);
   simulation.state.phase = "CHECKPOINT_RESPAWN";
