@@ -26,6 +26,7 @@ import {
 } from "../levels/storyLevels.js";
 import { createEndlessLevel } from "../levels/endlessLevel.js";
 import { syncPlayerBody } from "../playerAdapter.js";
+import { gameplayParameters } from "../gameplayParameters.js";
 
 const playerId = "player-1";
 const playerSize = 48;
@@ -34,11 +35,11 @@ const pressurePursuit: PursuitConfig = {
   enabled: true,
   gracePeriodMs: 1000,
   initialDistance: 260,
-  speed: 260,
-  accelerationIntervalMs: 3000,
-  accelerationStep: 10,
-  maxSpeed: 370,
-  catchDistance: 72
+  speed: gameplayParameters.pursuer.initialSpeedPxPerSecond,
+  accelerationIntervalMs: gameplayParameters.pursuer.accelerationIntervalMs,
+  accelerationStep: gameplayParameters.pursuer.accelerationStepPxPerSecond,
+  maxSpeed: gameplayParameters.pursuer.maxSpeedPxPerSecond,
+  catchDistance: gameplayParameters.pursuer.catchDistancePx
 };
 
 export class GameScene extends Phaser.Scene {
@@ -111,9 +112,11 @@ export class GameScene extends Phaser.Scene {
       tuning: {
         tickRateHz: 60,
         runSpeed: this.level.runSpeed,
-        playerAccelerationIntervalMs: 5000,
-        playerAccelerationStep: 10,
-        playerMaxSpeed: 350,
+        playerAccelerationIntervalMs:
+          gameplayParameters.player.accelerationIntervalMs,
+        playerAccelerationStep:
+          gameplayParameters.player.accelerationStepPxPerSecond,
+        playerMaxSpeed: gameplayParameters.player.maxSpeedPxPerSecond,
         gravityAcceleration: 1200,
         maxVerticalSpeed: 720,
         flipVelocityDamping: 0.2,

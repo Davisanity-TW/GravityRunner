@@ -2,13 +2,15 @@ import {
   createEndlessScheduler,
   type EndlessChunkSelection
 } from "@gravity-runner/game-core";
+import { gameplayParameters } from "../gameplayParameters.js";
 import type { LevelManifest } from "@gravity-runner/shared-contracts";
 
-export const ENDLESS_CHECKPOINT_BATCH = 10;
+export const ENDLESS_CHECKPOINT_BATCH =
+  gameplayParameters.endless.playableCheckpointBatch;
 
 export function createEndlessLevel(
   seed = 1337,
-  checkpointCount = ENDLESS_CHECKPOINT_BATCH
+  checkpointCount: number = ENDLESS_CHECKPOINT_BATCH
 ): LevelManifest {
   const scheduler = createEndlessScheduler(seed);
   const chunks: EndlessChunkSelection[] = [];
@@ -30,17 +32,21 @@ export function createEndlessLevel(
     height: 72
   }));
   const platforms = [...basePlatforms];
-  for (let index = 1; index < Math.min(checkpointCount, 10); index += 2) {
+  for (
+    let index = gameplayParameters.endless.floatingPlatformStartIndex;
+    index < Math.min(checkpointCount, 10);
+    index += 2
+  ) {
     const basePlatform = basePlatforms[index]!;
     platforms.push({
       id: `endless-floating-${index + 1}`,
       x: basePlatform.x + 280,
-      y: 300,
-      width: 360,
-      height: 48
+      y: gameplayParameters.endless.floatingPlatformY,
+      width: gameplayParameters.endless.floatingPlatformWidth,
+      height: gameplayParameters.endless.floatingPlatformHeight
     });
   }
-  const checkpointBuffer = 180;
+  const checkpointBuffer = gameplayParameters.terrain.checkpointSafeBufferPx;
   const checkpoints = chunks.map((chunk, index) => {
     if (index === chunks.length - 2) {
       const currentPlatform = basePlatforms[index]!;
@@ -63,7 +69,7 @@ export function createEndlessLevel(
   });
   const hazards = chunks.flatMap((chunk, index) => {
     const platform = basePlatforms[index]!;
-    const count = index >= 10 ? 2 : 1;
+    const count = index >= gameplayParameters.endless.extraHazardsStartIndex ? 2 : 1;
     return Array.from({ length: count }, (_, hazardIndex) => ({
       id: `endless-hazard-${index + 1}-${hazardIndex + 1}`,
       type: (index + hazardIndex) % 2 === 0 ? "electric" : "spikes",
@@ -75,7 +81,7 @@ export function createEndlessLevel(
   });
   const boostZones = chunks.flatMap((chunk, index) => {
     const platform = basePlatforms[index]!;
-    const count = index >= 10 ? 2 : 1;
+    const count = index >= gameplayParameters.endless.extraHazardsStartIndex ? 2 : 1;
     return Array.from({ length: count }, (_, boostIndex) => ({
       id: `endless-boost-${index + 1}-${boostIndex + 1}`,
       x: platform.x + Math.floor(chunk.width * (boostIndex === 0 ? 0.18 : 0.58)),
@@ -87,9 +93,9 @@ export function createEndlessLevel(
     }));
   });
   const terrainBlocks = chunks.flatMap((chunk, index) => {
-    if (index < 3) return [];
+    if (index < gameplayParameters.endless.terrainStartIndex) return [];
     const platform = basePlatforms[index]!;
-    const count = index >= 10 ? 2 : 1;
+    const count = index >= gameplayParameters.endless.extraHazardsStartIndex ? 2 : 1;
     return Array.from({ length: count }, (_, blockIndex) => ({
       id: `endless-block-${index + 1}-${blockIndex + 1}`,
       x: platform.x + Math.floor(chunk.width * (blockIndex === 0 ? 0.68 : 0.86)),
