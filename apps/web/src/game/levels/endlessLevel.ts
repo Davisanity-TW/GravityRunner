@@ -50,40 +50,44 @@ export function createEndlessLevel(
       gravityDirection: landingGravity
     };
   });
-  const hazards = chunks.slice(5).map((chunk, index) => {
-    const platform = platforms[index + 5]!;
-    return {
-      id: `endless-hazard-${index + 6}`,
-      type: index % 2 === 0 ? "electric" : "spikes",
-      x: platform.x + Math.floor(chunk.width * 0.48),
-      // Place the hazard on the opposite surface so a checkpoint respawn on
-      // the entry lane always has a readable escape route.
+  const hazards = chunks.flatMap((chunk, index) => {
+    if (index < 5) return [];
+    const platform = platforms[index]!;
+    const count = index >= 10 ? 2 : 1;
+    return Array.from({ length: count }, (_, hazardIndex) => ({
+      id: `endless-hazard-${index + 1}-${hazardIndex + 1}`,
+      type: (index + hazardIndex) % 2 === 0 ? "electric" : "spikes",
+      x: platform.x + Math.floor(chunk.width * (hazardIndex === 0 ? 0.48 : 0.78)),
       y: chunk.entryGravity === 1 ? 72 : 600,
-      width: 72 + index * 8,
+      width: 72 + index * 4 + hazardIndex * 8,
       height: 48
-    };
+    }));
   });
-  const boostZones = chunks.slice(5).map((chunk, index) => {
-    const platform = platforms[index + 5]!;
-    return {
-      id: `endless-boost-${index + 6}`,
-      x: platform.x + Math.floor(chunk.width * 0.18),
+  const boostZones = chunks.flatMap((chunk, index) => {
+    if (index < 5) return [];
+    const platform = platforms[index]!;
+    const count = index >= 10 ? 2 : 1;
+    return Array.from({ length: count }, (_, boostIndex) => ({
+      id: `endless-boost-${index + 1}-${boostIndex + 1}`,
+      x: platform.x + Math.floor(chunk.width * (boostIndex === 0 ? 0.18 : 0.58)),
       y: chunk.entryGravity === 1 ? 576 : 96,
       width: 120,
       height: 48,
       durationMs: 2_000,
-      multiplier: 1.15 + index * 0.05
-    };
+      multiplier: 1.15 + index * 0.025 + boostIndex * 0.05
+    }));
   });
-  const terrainBlocks = chunks.slice(5).map((chunk, index) => {
-    const platform = platforms[index + 5]!;
-    return {
-      id: `endless-block-${index + 6}`,
-      x: platform.x + Math.floor(chunk.width * 0.72),
-      y: index % 2 === 0 ? 220 : 180,
-      width: 80 + index * 8,
-      height: index % 2 === 0 ? 300 : 340
-    };
+  const terrainBlocks = chunks.flatMap((chunk, index) => {
+    if (index < 5) return [];
+    const platform = platforms[index]!;
+    const count = index >= 10 ? 2 : 1;
+    return Array.from({ length: count }, (_, blockIndex) => ({
+      id: `endless-block-${index + 1}-${blockIndex + 1}`,
+      x: platform.x + Math.floor(chunk.width * (blockIndex === 0 ? 0.68 : 0.86)),
+      y: blockIndex === 0 ? 220 : 180,
+      width: 80 + index * 4 + blockIndex * 8,
+      height: blockIndex === 0 ? 300 : 340
+    }));
   });
   const width = startX + distance + 160;
 

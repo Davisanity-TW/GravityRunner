@@ -22,7 +22,7 @@ export class HudScene extends Phaser.Scene {
         28,
         24,
         this.bridge.selectedMode === "ENDLESS"
-          ? "ENDLESS / BATCH 02 · 10 CHECKPOINTS"
+          ? "ENDLESS / BATCH 03 · 15 CHECKPOINTS"
           : this.bridge.selectedLevelId === "signal-vault-03"
           ? "SV-03 / PRESSURE FINALE"
           : this.bridge.selectedLevelId === "signal-vault-02"
