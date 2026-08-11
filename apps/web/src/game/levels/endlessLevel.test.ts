@@ -16,7 +16,10 @@ describe("endless authored route", () => {
     const second = createEndlessLevel(1337, 15);
     expect(first.checkpoints).toHaveLength(15);
     expect(first).toEqual(second);
-    expect(first.platforms).toHaveLength(15);
+    expect(first.platforms).toHaveLength(20);
+    expect(
+      first.platforms.filter((platform) => platform.id.startsWith("endless-floating"))
+    ).toHaveLength(5);
     expect(first.hazards).toHaveLength(20);
     expect(first.boostZones).toHaveLength(20);
     expect(first.terrainBlocks).toHaveLength(17);
