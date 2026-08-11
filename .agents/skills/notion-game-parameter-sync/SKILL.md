@@ -16,7 +16,7 @@ Use this skill whenever the user asks to sync, change, or inspect gameplay param
 ## Sync procedure
 
 1. Fetch the Notion page and read all parameter tables.
-2. Map keys to `packages/config/src/index.ts`:
+2. Map keys to `apps/web/src/game/gameplayParameters.ts`:
    - `player.*` → `gameplayParameters.player`
    - `pursuer.*` → `gameplayParameters.pursuer`
    - `terrain.*` → `gameplayParameters.terrain`
