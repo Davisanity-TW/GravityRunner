@@ -17,9 +17,9 @@ describe("endless authored route", () => {
     expect(first.checkpoints).toHaveLength(15);
     expect(first).toEqual(second);
     expect(first.platforms).toHaveLength(15);
-    expect(first.hazards).toHaveLength(15);
-    expect(first.boostZones).toHaveLength(15);
-    expect(first.terrainBlocks).toHaveLength(15);
+    expect(first.hazards).toHaveLength(20);
+    expect(first.boostZones).toHaveLength(20);
+    expect(first.terrainBlocks).toHaveLength(17);
     for (const hazard of first.hazards) {
       expect(hazard.y === 72 || hazard.y === 600).toBe(true);
     }

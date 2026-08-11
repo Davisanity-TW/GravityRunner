@@ -51,7 +51,6 @@ export function createEndlessLevel(
     };
   });
   const hazards = chunks.flatMap((chunk, index) => {
-    if (index < 5) return [];
     const platform = platforms[index]!;
     const count = index >= 10 ? 2 : 1;
     return Array.from({ length: count }, (_, hazardIndex) => ({
@@ -64,7 +63,6 @@ export function createEndlessLevel(
     }));
   });
   const boostZones = chunks.flatMap((chunk, index) => {
-    if (index < 5) return [];
     const platform = platforms[index]!;
     const count = index >= 10 ? 2 : 1;
     return Array.from({ length: count }, (_, boostIndex) => ({
@@ -78,7 +76,7 @@ export function createEndlessLevel(
     }));
   });
   const terrainBlocks = chunks.flatMap((chunk, index) => {
-    if (index < 5) return [];
+    if (index < 3) return [];
     const platform = platforms[index]!;
     const count = index >= 10 ? 2 : 1;
     return Array.from({ length: count }, (_, blockIndex) => ({

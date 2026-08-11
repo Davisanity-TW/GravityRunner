@@ -24,7 +24,7 @@ const GameCanvas = lazy(async () => {
   return { default: module.GameCanvas };
 });
 
-type AppScreen = "menu" | "levels" | "practice" | "game";
+type AppScreen = "menu" | "levels" | "practice" | "endless" | "game";
 type RunMode = "STORY" | "PRACTICE" | "ENDLESS";
 const endlessBestScoreKey = "gravity-runner.endless-best-score.v1";
 
@@ -302,6 +302,66 @@ function PracticeSelect({
   );
 }
 
+function EndlessSelect({
+  onStart,
+  onBack
+}: {
+  onStart(checkpointId: string | null): void;
+  onBack(): void;
+}) {
+  const [startSection, setStartSection] = useState(1);
+  return (
+    <section className="story-level-select" aria-labelledby="endless-title">
+      <div className="level-select-heading">
+        <div>
+          <p className="eyebrow">ENDLESS / START CONFIGURATION</p>
+          <h1 id="endless-title">Choose your starting section.</h1>
+          <p className="lede">
+            Start at section 1 by default, or jump to any generated checkpoint
+            for focused testing.
+          </p>
+        </div>
+        <button className="text-button" type="button" onClick={onBack}>
+          ← Return to mode select
+        </button>
+      </div>
+      <div className="level-grid" role="region" aria-label="Endless start section">
+        <article className="level-card level-card--available">
+          <div className="mode-card__topline">
+            <span>ENDLESS RELAY</span>
+            <span>15 CHECKPOINTS</span>
+          </div>
+          <h2>Batch 03</h2>
+          <p>Test early teaching sections or jump directly into later terrain.</p>
+          <label className="field-row">
+            <span>
+              <strong>Start section</strong>
+              <small>Section 1 starts from the opening.</small>
+            </span>
+            <select
+              value={startSection}
+              onChange={(event) => setStartSection(Number(event.target.value))}
+            >
+              {Array.from({ length: 15 }, (_, index) => index + 1).map((section) => (
+                <option key={section} value={section}>
+                  Section {section}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            className="play-button"
+            type="button"
+            onClick={() => onStart(startSection === 1 ? null : `endless-${startSection - 1}`)}
+          >
+            Start Endless
+          </button>
+        </article>
+      </div>
+    </section>
+  );
+}
+
 export function App() {
   const [screen, setScreen] = useState<AppScreen>("menu");
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -494,7 +554,7 @@ export function App() {
                       setRunMode("ENDLESS");
                       setSelectedLevelId("signal-vault-01");
                       setStartCheckpointId(null);
-                      setScreen("game");
+                      setScreen("endless");
                     }}
                   >
                     Start endless
@@ -526,6 +586,16 @@ export function App() {
           onStart={(levelId, checkpointId) => {
             setSelectedLevelId(levelId);
             setRunMode("PRACTICE");
+            setStartCheckpointId(checkpointId);
+            setScreen("game");
+          }}
+        />
+      ) : screen === "endless" ? (
+        <EndlessSelect
+          onBack={() => setScreen("menu")}
+          onStart={(checkpointId) => {
+            setRunMode("ENDLESS");
+            setSelectedLevelId("signal-vault-01");
             setStartCheckpointId(checkpointId);
             setScreen("game");
           }}
