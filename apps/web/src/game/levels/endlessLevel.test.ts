@@ -88,4 +88,22 @@ describe("endless authored route", () => {
     expect(level.checkpoints[8]!.x).toBeLessThan(level.checkpoints[9]!.x);
   });
 
+  it("keeps the final checkpoint on its platform surface after respawn", () => {
+    const level = createEndlessLevel(1337, 20);
+    const finalCheckpoint = level.checkpoints.at(-1)!;
+    const supportingPlatform = level.platforms.find(
+      (platform) =>
+        finalCheckpoint.x >= platform.x &&
+        finalCheckpoint.x <= platform.x + platform.width &&
+        (finalCheckpoint.gravityDirection === 1
+          ? finalCheckpoint.y === platform.y - 24
+          : finalCheckpoint.y === platform.y + platform.height + 24)
+    );
+
+    expect(supportingPlatform).toBeDefined();
+    expect(finalCheckpoint.gravityDirection).toBe(
+      supportingPlatform!.y === 648 ? 1 : -1
+    );
+  });
+
 });

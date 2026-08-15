@@ -48,6 +48,15 @@ export function createEndlessLevel(
   }
   const checkpointBuffer = gameplayParameters.terrain.checkpointSafeBufferPx;
   const checkpoints = chunks.map((chunk, index) => {
+    if (index === chunks.length - 1) {
+      const finalPlatform = basePlatforms[index]!;
+      return {
+        id: `endless-${index + 1}`,
+        x: finalPlatform.x + finalPlatform.width - checkpointBuffer,
+        y: chunk.entryGravity === 1 ? 624 : 96,
+        gravityDirection: chunk.entryGravity
+      };
+    }
     if (index === chunks.length - 2) {
       const currentPlatform = basePlatforms[index]!;
       return {
