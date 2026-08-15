@@ -20,7 +20,7 @@ export const gameplayParameters = {
   terrain: { checkpointSafeBufferPx: 180 },
   endless: {
     targetCheckpointCount: 35,
-    playableCheckpointBatch: 15,
+    playableCheckpointBatch: 20,
     floatingPlatformStartIndex: 1,
     floatingPlatformY: 300,
     floatingPlatformWidth: 360,

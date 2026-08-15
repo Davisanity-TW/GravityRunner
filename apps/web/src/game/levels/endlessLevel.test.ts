@@ -12,17 +12,17 @@ import { createEndlessLevel } from "./endlessLevel.js";
 
 describe("endless authored route", () => {
   it("creates the second five-checkpoint batch deterministically", () => {
-    const first = createEndlessLevel(1337, 15);
-    const second = createEndlessLevel(1337, 15);
-    expect(first.checkpoints).toHaveLength(15);
+    const first = createEndlessLevel(1337, 20);
+    const second = createEndlessLevel(1337, 20);
+    expect(first.checkpoints).toHaveLength(20);
     expect(first).toEqual(second);
-    expect(first.platforms).toHaveLength(20);
+    expect(first.platforms).toHaveLength(30);
     expect(
       first.platforms.filter((platform) => platform.id.startsWith("endless-floating"))
-    ).toHaveLength(5);
-    expect(first.hazards).toHaveLength(20);
-    expect(first.boostZones).toHaveLength(20);
-    expect(first.terrainBlocks).toHaveLength(17);
+    ).toHaveLength(10);
+    expect(first.hazards).toHaveLength(30);
+    expect(first.boostZones).toHaveLength(30);
+    expect(first.terrainBlocks).toHaveLength(27);
     for (const hazard of first.hazards) {
       expect(hazard.y === 72 || hazard.y === 600).toBe(true);
     }

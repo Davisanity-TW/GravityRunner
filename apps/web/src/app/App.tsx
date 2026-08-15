@@ -329,9 +329,9 @@ function EndlessSelect({
         <article className="level-card level-card--available">
           <div className="mode-card__topline">
             <span>ENDLESS RELAY</span>
-            <span>15 CHECKPOINTS</span>
+            <span>20 CHECKPOINTS</span>
           </div>
-          <h2>Batch 03</h2>
+          <h2>Batch 04</h2>
           <p>Test early teaching sections or jump directly into later terrain.</p>
           <label className="field-row">
             <span>
@@ -342,7 +342,7 @@ function EndlessSelect({
               value={startSection}
               onChange={(event) => setStartSection(Number(event.target.value))}
             >
-              {Array.from({ length: 15 }, (_, index) => index + 1).map((section) => (
+              {Array.from({ length: 20 }, (_, index) => index + 1).map((section) => (
                 <option key={section} value={section}>
                   Section {section}
                 </option>

@@ -34,7 +34,7 @@ export function createEndlessLevel(
   const platforms = [...basePlatforms];
   for (
     let index = gameplayParameters.endless.floatingPlatformStartIndex;
-    index < Math.min(checkpointCount, 10);
+    index < Math.min(checkpointCount, 20);
     index += 2
   ) {
     const basePlatform = basePlatforms[index]!;
