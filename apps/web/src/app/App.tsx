@@ -1,5 +1,8 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 
+import { EditorCanvas } from "../editor/EditorCanvas.js";
+import { signalVaultLevel } from "../game/levels/signalVault.js";
+
 import {
   defaultGameSettings,
   flipKeyLabels,
@@ -24,7 +27,7 @@ const GameCanvas = lazy(async () => {
   return { default: module.GameCanvas };
 });
 
-type AppScreen = "menu" | "levels" | "practice" | "endless" | "game";
+type AppScreen = "menu" | "levels" | "practice" | "endless" | "editor" | "game";
 type RunMode = "STORY" | "PRACTICE" | "ENDLESS";
 const endlessBestScoreKey = "gravity-runner.endless-best-score.v1";
 
@@ -325,14 +328,20 @@ function EndlessSelect({
           ← Return to mode select
         </button>
       </div>
-      <div className="level-grid" role="region" aria-label="Endless start section">
+      <div
+        className="level-grid"
+        role="region"
+        aria-label="Endless start section"
+      >
         <article className="level-card level-card--available">
           <div className="mode-card__topline">
             <span>ENDLESS RELAY</span>
             <span>20 CHECKPOINTS</span>
           </div>
           <h2>Batch 04</h2>
-          <p>Test early teaching sections or jump directly into later terrain.</p>
+          <p>
+            Test early teaching sections or jump directly into later terrain.
+          </p>
           <label className="field-row">
             <span>
               <strong>Start section</strong>
@@ -342,17 +351,21 @@ function EndlessSelect({
               value={startSection}
               onChange={(event) => setStartSection(Number(event.target.value))}
             >
-              {Array.from({ length: 20 }, (_, index) => index + 1).map((section) => (
-                <option key={section} value={section}>
-                  Section {section}
-                </option>
-              ))}
+              {Array.from({ length: 20 }, (_, index) => index + 1).map(
+                (section) => (
+                  <option key={section} value={section}>
+                    Section {section}
+                  </option>
+                )
+              )}
             </select>
           </label>
           <button
             className="play-button"
             type="button"
-            onClick={() => onStart(startSection === 1 ? null : `endless-${startSection - 1}`)}
+            onClick={() =>
+              onStart(startSection === 1 ? null : `endless-${startSection - 1}`)
+            }
           >
             Start Endless
           </button>
@@ -566,6 +579,24 @@ export function App() {
                 )}
               </article>
             ))}
+            <article className="mode-card mode-card--available mode-card--editor">
+              <div className="mode-card__topline">
+                <span>AUTHORING</span>
+                <span>EARLY ACCESS</span>
+              </div>
+              <h2>Map Editor</h2>
+              <p>
+                Compose a route on a landscape canvas with grid and safe-area
+                guides.
+              </p>
+              <button
+                type="button"
+                className="play-button"
+                onClick={() => setScreen("editor")}
+              >
+                Open editor
+              </button>
+            </article>
           </div>
         </section>
       ) : screen === "levels" ? (
@@ -600,6 +631,19 @@ export function App() {
             setScreen("game");
           }}
         />
+      ) : screen === "editor" ? (
+        <>
+          <div className="editor-backbar">
+            <button
+              className="text-button"
+              type="button"
+              onClick={() => setScreen("menu")}
+            >
+              ← Return to mission control
+            </button>
+          </div>
+          <EditorCanvas level={signalVaultLevel} />
+        </>
       ) : (
         <section className="runtime-screen" aria-label="Game runtime">
           <div className="runtime-toolbar">
