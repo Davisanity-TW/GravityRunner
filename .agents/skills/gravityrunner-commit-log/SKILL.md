@@ -1,7 +1,7 @@
 ---
 name: gravityrunner-commit-log
 description: >
-  專用於 GravityRunner 專案的完成收尾流程。每當一個 backlog 項目完成，或使用者列出的 bug/issue 修正完成並驗證後，使用此 skill 建立一次獨立 Git commit、自動 push 到目前分支的 origin，並把 commit SHA、日期與 50 字以內繁體中文摘要追加到指定 Notion 頁面的表格。觸發於完成 backlog、修 bug、修 issue、準備提交或要求記錄 commit。
+  專用於 GravityRunner 專案的完成收尾流程。每當一個 backlog 項目完成，或使用者列出的 bug/issue 修正完成並驗證後，使用此 skill 建立一次獨立 Git commit、自動 push 到目前分支的 origin、在對話中以 100 字內繁體中文說明改動，並把 commit SHA、日期與 50 字以內繁體中文摘要追加到指定 Notion 頁面的表格。觸發於完成 backlog、修 bug、修 issue、準備提交或要求記錄 commit。
 ---
 
 # GravityRunner Commit Log
@@ -12,6 +12,7 @@ description: >
 - Notion page：`https://app.notion.com/p/Repo-commit-3c34461aa44e80dca41fea79f30add40?source=copy_link`
 - Notion page ID：`3c34461aa44e80dca41fea79f30add40`
 - commit subject 使用 Conventional Commits；摘要欄位必須是 50 字以內繁體中文。
+- 每次 commit 後的對話說明必須使用繁體中文且不超過 100 字；聚焦實際改動與驗證結果。
 
 ## 觸發條件
 
@@ -48,7 +49,7 @@ description: >
    ```
 
    已有表格時只追加資料列；追加前比對 SHA，避免重複記錄。使用 Notion 語法不確定時，先讀取 `notion://docs/enhanced-markdown-spec`。
-8. 再次 fetch 確認新列存在，回報 commit SHA、push、驗證結果與 Notion 記錄結果。
+8. 再次 fetch 確認新列存在，並在本次對話回報：commit SHA、push 結果、驗證結果、Notion 記錄結果，以及 100 字內的繁體中文改動說明。不可只回報「已完成」。
 
 ## 失敗處理
 
