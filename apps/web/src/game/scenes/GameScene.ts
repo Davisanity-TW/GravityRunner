@@ -20,6 +20,7 @@ import type { GameEventBridge } from "../bridge.js";
 import { bindPhaserInput } from "../inputAdapter.js";
 import { createInputCommandController } from "../inputController.js";
 import { applyLevelInteractions } from "../levelRuntime.js";
+import { createLevelNodeSpecs } from "../levelNodeAdapter.js";
 import {
   getStoryLevelManifest,
   type StoryRuntimeLevelId
@@ -249,6 +250,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private renderLevel(level: LevelManifest): void {
+    const nodes = createLevelNodeSpecs(level);
     this.renderParallax(level);
     const grid = this.add.graphics().setDepth(-10);
     grid.lineStyle(1, 0x15364d, 0.42);
@@ -259,7 +261,7 @@ export class GameScene extends Phaser.Scene {
       grid.lineBetween(0, y, level.width, y);
     }
 
-    for (const platform of level.platforms) {
+    for (const platform of nodes.filter((node) => node.kind === "platform")) {
       this.add
         .rectangle(
           platform.x + platform.width / 2,
@@ -271,7 +273,7 @@ export class GameScene extends Phaser.Scene {
         .setStrokeStyle(2, 0x2b6680, 0.65);
     }
 
-    for (const hazard of level.hazards) {
+    for (const hazard of nodes.filter((node) => node.kind === "hazard")) {
       const graphics = this.add.graphics().setDepth(8);
       const color = hazard.type === "electric" ? 0x79dfff : 0xffc857;
       graphics.fillStyle(color, 0.95);
@@ -317,7 +319,7 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
-    for (const zone of level.boostZones ?? []) {
+    for (const zone of nodes.filter((node) => node.kind === "boost-zone")) {
       const boost = this.add.graphics().setDepth(7);
       boost.fillStyle(0xffd166, 0.24);
       boost.fillRoundedRect(zone.x, zone.y, zone.width, zone.height, 10);
@@ -340,7 +342,7 @@ export class GameScene extends Phaser.Scene {
         .setDepth(8);
     }
 
-    for (const block of level.terrainBlocks ?? []) {
+    for (const block of nodes.filter((node) => node.kind === "terrain-block")) {
       const terrain = this.add.graphics().setDepth(9);
       terrain.fillStyle(0x5d345e, 0.88);
       terrain.fillRoundedRect(block.x, block.y, block.width, block.height, 10);
@@ -367,7 +369,7 @@ export class GameScene extends Phaser.Scene {
         .setDepth(10);
     }
 
-    for (const checkpoint of level.checkpoints) {
+    for (const checkpoint of nodes.filter((node) => node.kind === "checkpoint")) {
       this.add
         .rectangle(
           checkpoint.x,
@@ -388,19 +390,23 @@ export class GameScene extends Phaser.Scene {
         .setOrigin(0, 1);
     }
 
+    const finish = nodes.find((node) => node.kind === "finish");
+    if (finish === undefined) {
+      return;
+    }
     this.add
       .rectangle(
-        level.finish.x + level.finish.width / 2,
-        level.finish.y + level.finish.height / 2,
-        level.finish.width,
-        level.finish.height,
+        finish.x + finish.width / 2,
+        finish.y + finish.height / 2,
+        finish.width,
+        finish.height,
         0x72fbc1,
         0.13
       )
       .setStrokeStyle(3, 0x72fbc1, 0.85);
     this.add
       .text(
-        level.finish.x + level.finish.width / 2,
+        finish.x + finish.width / 2,
         level.height / 2,
         "EXTRACT",
         {
