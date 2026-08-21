@@ -1,0 +1,7 @@
+interface:
+  display_name: "GravityRunner Commit Log"
+  short_description: "完成項目後自動 commit、push 並記錄 Notion"
+  default_prompt: "使用 $gravityrunner-commit-log 完成這個 backlog 或 bug/issue，驗證後 commit 並記錄 Notion。"
+
+policy:
+  allow_implicit_invocation: true
